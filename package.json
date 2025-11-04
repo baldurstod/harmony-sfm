@@ -1,0 +1,31 @@
+{
+	"name": "harmony-sfm",
+	"version": "0.0.1",
+	"type": "module",
+	"description": "SFM exporter in typescript",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/baldurstod/harmony-sfm.git"
+	},
+	"bugs": {
+		"url": "https://github.com/baldurstod/harmony-sfm/issues"
+	},
+	"homepage": "https://github.com/baldurstod/harmony-sfm#readme",
+	"devDependencies": {
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-typescript": "^12.3.0",
+		"eslint": "^9.39.1",
+		"rollup": "^4.52.5",
+		"tslib": "^2.8.1",
+		"typescript-eslint": "^8.46.3"
+	},
+	"dependencies": {
+		"harmony-3d": "github:baldurstod/harmony-3d",
+		"harmony-types": "github:baldurstod/harmony-types"
+	}
+}
