@@ -150,7 +150,7 @@ export class DmAttribute {
 		}
 		*/
 		const value = this.getValue();
-		if (value) {
+		if (value !== undefined && value !== null) {
 			this.#serialize(value, buf);
 		}
 	}
