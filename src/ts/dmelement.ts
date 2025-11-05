@@ -60,8 +60,10 @@ export class DmElement {
 				/* TODO check value / type*/
 				attribute.setValue(attributeValue);
 			} else {
-				for (const value of attributeValue as []) {
-					attribute.pushValue(value);
+				if (attributeValue !== null) {
+					for (const value of attributeValue as []) {
+						attribute.pushValue(value);
+					}
 				}
 			}
 		}

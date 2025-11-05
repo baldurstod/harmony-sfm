@@ -503,8 +503,10 @@ class DmElement {
                 attribute.setValue(attributeValue);
             }
             else {
-                for (const value of attributeValue) {
-                    attribute.pushValue(value);
+                if (attributeValue !== null) {
+                    for (const value of attributeValue) {
+                        attribute.pushValue(value);
+                    }
                 }
             }
         }
