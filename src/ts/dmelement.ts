@@ -1,5 +1,5 @@
 import { DmAttribute, DmAttributeValue } from './dmattribute';
-import { DmAttributeType } from './dmattributetypes';
+import { DmAttributeType, DmAttributeTypeFirstArray } from './dmattributetypes';
 import { DmElementReference } from './dmelementreference';
 import { UniqueId } from './uniqueid';
 export * from './dmattributetypes2';
@@ -56,7 +56,14 @@ export class DmElement {
 		this.m_pAttributes = attribute;
 
 		if (attributeValue !== undefined) {
-			attribute.setValue(attributeValue);
+			if (attributeType < DmAttributeTypeFirstArray) {
+				/* TODO check value / type*/
+				attribute.setValue(attributeValue);
+			} else {
+				for (const value of attributeValue as []) {
+					attribute.pushValue(value);
+				}
+			}
 		}
 
 		//g_pDataModelImp->NotifyState( NOTIFY_CHANGE_TOPOLOGICAL );
