@@ -16,13 +16,13 @@ export class DmElementSerializationDictionary {
 	m_Dict2: number[] = [];
 
 	//void BuildElementList( CDmElement *pRoot, bool bFlatMode );
-	buildElementList(root: DmElement, flatMode: boolean) {
+	buildElementList(root: DmElement, flatMode: boolean): void {
 		this.#buildElementList_R(root, flatMode, true);
 	}
 
 	// Should I inline the serialization of this element?
 	//bool ShouldInlineElement( CDmElement *pElement );
-	shouldInlineElement(element: DmElement) {
+	shouldInlineElement(element: DmElement): boolean {
 		if (element) {
 			const handle = element.getHandle();
 			const info = this.m_Dict[handle];
@@ -35,14 +35,14 @@ export class DmElementSerializationDictionary {
 	}
 
 	// Clears the dictionary
-	clear() {
+	clear(): void {
 		//TODO
 		console.error('fixme');
 	}
 
 	// Iterates over all root elements to serialize
 	//DmElementDictHandle_t FirstRootElement() const;
-	firstRootElement() {
+	firstRootElement(): number {
 		const nCount = this.m_Dict2.length;
 		for (let h = 0; h < nCount; h++) {
 			if (this.m_Dict[this.m_Dict2[h]!]?.m_bRoot) {
@@ -53,7 +53,7 @@ export class DmElementSerializationDictionary {
 	}
 
 	//DmElementDictHandle_t NextRootElement( DmElementDictHandle_t h ) const;
-	nextRootElement(h: number) {
+	nextRootElement(h: number): number {
 		++h;
 		const nCount = this.m_Dict2.length;
 		for (; h < nCount; h++) {
@@ -65,25 +65,25 @@ export class DmElementSerializationDictionary {
 	}
 
 	//CDmElement* GetRootElement( DmElementDictHandle_t h );
-	getRootElement(h: number) {
-		return this.m_Dict[this.m_Dict2[h]!]?.m_pElement;
+	getRootElement(h: number): DmElement | null {
+		return this.m_Dict[this.m_Dict2[h]!]?.m_pElement ?? null;
 	}
 
 	// Finds the handle of the element
 	//DmElementDictHandle_t Find( CDmElement *pElement );
-	find(pElement: DmElement) {
+	find(/*pElement: DmElement*/): void {
 		console.error('fixme');
 		//TODO
 	}
 
 	// How many root elements do we have?
 	//int RootElementCount() const;
-	rootElementCount() {
+	rootElementCount(): void {
 		console.error('fixme');
 		//TODO
 	}
 
-	addElement(element: DmElement, isRoot: boolean) {
+	addElement(element: DmElement, isRoot: boolean): void {
 		const handle = element.getHandle();
 		const info = new ElementInfo();
 		info.m_bRoot = isRoot;
@@ -94,7 +94,7 @@ export class DmElementSerializationDictionary {
 	}
 
 	//void BuildElementList_R( CDmElement *pElement, bool bFlatMode, bool bIsRoot );
-	#buildElementList_R(pElement: DmElement, bFlatMode: boolean, bIsRoot: boolean) {
+	#buildElementList_R(pElement: DmElement, bFlatMode: boolean, bIsRoot: boolean): void {
 		if (!pElement) { return; }
 		//console.error('fixme');
 

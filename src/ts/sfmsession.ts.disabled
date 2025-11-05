@@ -12,10 +12,10 @@ import { BufferFlags, UtlBuffer } from './utlbuffer';
 
 const CLIP_TYPE_CHANNEL = 0;
 const CLIP_TYPE_AUDIO = 1;
-//const CLIP_TYPE_EFFECTS = 2;
+const CLIP_TYPE_EFFECTS = 2;
 const CLIP_TYPE_FILM = 3;
 
-//let createFilmClipId = 0;
+let createFilmClipId = 0;
 
 
 const elementTemplates: Record<string, Record<string, any>> = {};
@@ -183,7 +183,7 @@ export class SfmSession {
 
 	#createFilmClip(clipName: string, trackGroups: DmElement[] = [], subClipTrackGroup: DmElement | undefined, camera: never | undefined, scene: DmElement | undefined, animationSets: never[] | undefined = [], mapname: string): DmElement {
 		//animationSets = (animationSets instanceof Array) ? animationSets : [];
-		//++createFilmClipId;
+		++createFilmClipId;
 		const dmeFilmClip = DataModel.createElement(undefined, 'DmeFilmClip', clipName/*'test' + CreateFilmClip.clipId*/);
 		dmeFilmClip.createAttribute('timeFrame', DmAttributeType.Element, this.#createDmeTimeFrame());
 		dmeFilmClip.createAttribute('color', DmAttributeType.Color, vec4.fromValues(0, 0, 0, 0)/*'0 255 0 255'*/);
@@ -358,7 +358,7 @@ export class SfmSession {
 		return dmeChannel;
 	}
 
-	#getTypeName(type: DmAttributeType): string {
+	#getTypeName(type: number/*TODO: improve type*/) {
 		switch (type) {
 			/*
 
@@ -403,7 +403,7 @@ export class SfmSession {
 		return '';
 	}
 
-	#createDmeTypedLog(type: DmAttributeType, name: string, times: number[] = [], values: any[] = []): DmElement {
+	#createDmeTypedLog(type: number/*TODO: improve type*/, name: string, times: number[] = [], values: any[] = []) {
 		//times = (times instanceof Array) ? times : [];
 		//values = (values instanceof Array) ? values : [];
 
@@ -426,7 +426,7 @@ export class SfmSession {
 		return dmeTypedLog;
 	}
 
-	#createDmeTypedLayer(type: number/*TODO: improve type*/, name: string, times: number[], values: any[]): DmElement {
+	#createDmeTypedLayer(type: number/*TODO: improve type*/, name: string, times: number[], values: any[]) {
 		times = (times instanceof Array) ? times : [];
 		values = (values instanceof Array) ? values : [];
 
@@ -441,7 +441,7 @@ export class SfmSession {
 		return dmeTypedLayer;
 	}
 
-	#createDmeChannelsClip(name: string, timeFrame: DmElement, channels: DmElement[]): DmElement {
+	#createDmeChannelsClip(name: string, timeFrame: DmElement, channels: DmElement[]) {
 		const dmeChannelsClip = DataModel.createElement(undefined, 'DmeChannelsClip', name);
 
 		dmeChannelsClip.createAttribute('timeFrame', DmAttributeType.Element, timeFrame);
@@ -494,7 +494,7 @@ export class SfmSession {
 		return dmeChannelsClip;
 	}
 
-	#createDmeTrackGroup(trackGroupName: string, tracks: DmElement[]): DmElement {
+	#createDmeTrackGroup(trackGroupName: string, tracks: DmElement[]) {
 		const dmeTrackGroup = DataModel.createElement(undefined, 'DmeTrackGroup', trackGroupName);
 
 		const trackList = Array.from(tracks);
@@ -511,7 +511,7 @@ export class SfmSession {
 		return dmeTrackGroup;
 	}
 
-	#createDmeTimeFrame(name?: string, startTime = 0, duration = 60, offset = 0, scale = 1): DmElement {
+	#createDmeTimeFrame(name?: string, startTime = 0, duration = 60, offset = 0, scale = 1) {
 		const dmeTimeFrame = DataModel.createElement(undefined, 'DmeTimeFrame');
 		dmeTimeFrame.createAttribute('start', DmAttributeType.Time, startTime);
 		dmeTimeFrame.createAttribute('duration', DmAttributeType.Time, duration);
@@ -528,7 +528,7 @@ export class SfmSession {
 		return dmeTimeFrame;
 	}
 
-	#createDmeTransformControl(name: string, valuePosition = vec3.create(), valueOrientation = quat.create(), positionChannel?: DmElement, orientationChannel?: DmElement): DmElement {
+	#createDmeTransformControl(name: string, valuePosition = vec3.create(), valueOrientation = quat.create(), positionChannel?: DmElement, orientationChannel?: DmElement) {
 		const dmeTransformControl = DataModel.createElement(undefined, 'DmeTransformControl', name);
 
 		dmeTransformControl.createAttribute('valuePosition', DmAttributeType.Vector3, valuePosition);//TODO
@@ -546,7 +546,7 @@ export class SfmSession {
 		return dmeTransformControl;
 	}
 
-	#createDmeScaleControl(name: string, valueScale: number, scaleChannel: DmElement): DmElement {
+	#createDmeScaleControl(name: string, valueScale: number, scaleChannel: DmElement) {
 		const dmeTransformControl = DataModel.createElement(undefined, 'DmElement', name);
 
 		dmeTransformControl.createAttribute('value', DmAttributeType.Float, valueScale);//TODO
@@ -556,7 +556,7 @@ export class SfmSession {
 		return dmeTransformControl;
 	}
 
-	#createDmeAnimationSet(name: string, controls: DmElement[], rootControlGroup: DmElement/*, gameModel*/): DmElement {
+	#createDmeAnimationSet(name: string, controls: DmElement[], rootControlGroup: DmElement/*, gameModel*/) {
 		const dmeAnimationSet = DataModel.createElement(undefined, 'DmeAnimationSet', name);
 
 		//controls = (controls instanceof Array) ? controls : [];
@@ -570,7 +570,7 @@ export class SfmSession {
 		return dmeAnimationSet;
 	}
 
-	#createDmeGameModel(name: string, modelName: string, transform: DmElement | undefined, children: DmElement[] = [], skin = 0, bodyGroups: number, bones: DmElement[] = []): DmElement {
+	#createDmeGameModel(name: string, modelName: string, transform: DmElement | undefined, children: DmElement[] = [], skin = 0, bodyGroups: number, bones: DmElement[] = []) {
 		//skin = typeof skin == 'number' ? skin : 0;
 		//children = (children instanceof Array) ? children : [];
 		//bones = (bones instanceof Array) ? bones : [];
@@ -599,7 +599,7 @@ export class SfmSession {
 		return dmeGameModel;
 	}
 
-	createDmeGameParticleSystem(name: string, systemName: string, transform: DmElement): DmElement {
+	createDmeGameParticleSystem(name: string, systemName: string, transform: DmElement) {
 		const dmeGameParticleSystem = DataModel.createElement(undefined, 'DmeGameParticleSystem', name);
 		dmeGameParticleSystem.createAttribute('transform', DmAttributeType.Element, transform);
 		dmeGameParticleSystem.createAttribute('shape', DmAttributeType.Element, null);
@@ -619,7 +619,7 @@ export class SfmSession {
 		return dmeGameParticleSystem;
 	}
 
-	createDmeMaterial(mtlName: string): DmElement {
+	createDmeMaterial(mtlName: string) {
 		//colorTintBase = colorTintBase || vec4.fromValues(255, 255, 255, 255)/*'255 255 255 255'*/;
 
 		// remove material path
@@ -634,7 +634,7 @@ export class SfmSession {
 		return dmeMaterial;
 	}
 
-	addGameModelMaterial(gameModel: DmElement, material: DmElement): void {
+	addGameModelMaterial(gameModel: DmElement, material: DmElement) {
 		if (gameModel) {
 			const materials = gameModel.findAttribute('materials');
 			if (materials) {
@@ -645,7 +645,7 @@ export class SfmSession {
 		}
 	}
 
-	#createDmeControlGroup(name?: string, children: DmElement[] = [], controls: DmElement[] = []): DmElement {
+	#createDmeControlGroup(name?: string, children: DmElement[] = [], controls: DmElement[] = []) {
 		//children = (children instanceof Array) ? children : [];
 		//controls = (controls instanceof Array) ? controls : [];
 		const dmeControlGroup = DataModel.createElement(undefined, 'DmeControlGroup', name);
@@ -662,7 +662,7 @@ export class SfmSession {
 		return dmeControlGroup;
 	}
 
-	createAnimSetForModel(name: string, modelPath: string, dynamicProp: Source1ModelInstance, position: vec3, quaternion: quat, parentGameModel: DmElement | undefined, viewTargetPos?: vec3): DmElement | null {
+	createAnimSetForModel(name: string, modelPath: string, dynamicProp: Source1ModelInstance, position: vec3, quaternion: quat, parentGameModel: DmElement | undefined, viewTargetPos?: vec3) {
 		modelPath = modelPath.replace(/\.mdl$/, '') + '.mdl';
 		const sourceModel = dynamicProp.sourceModel;
 		if (!(sourceModel instanceof SourceModel)) {
@@ -1056,6 +1056,8 @@ export class SfmSession {
 
 		return elementName;
 	}
+
+
 
 	#linkBoneChild(bone: DmElement, parentGameModel: DmElement): void {
 		const boneName = this.#getBoneName(bone);

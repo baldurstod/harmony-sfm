@@ -15,7 +15,7 @@ CDmElement::CDmElement( DmElementHandle_t handle, const char *pElementType, cons
 
 const DMELEMENT_HANDLE_INVALID = -1;
 export class DmElement {
-	isDmElement: true = true;
+	isDmElement = true as const;
 	m_pAttributes: DmAttribute | null = null;
 	m_ref: DmElementReference
 	m_Type: string;
@@ -36,20 +36,20 @@ export class DmElement {
 	}
 
 	//CDmAttribute *CDmElement::CreateAttribute( const char *pAttributeName, DmAttributeType_t type )
-	createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue: any) {
+	createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue: any): DmAttribute | null {
 		if (this.hasAttribute(attributeName, attributeType)) {
 			const attribute = this.findAttribute(attributeName);
 			if (attribute) {
 				attribute.setValue(attributeValue);
 			}
 			//TODO
-			return false;
+			return null;
 		}
 		this.markDirty();
 
 		const attribute = DmAttribute.createAttribute(this, attributeType, attributeName);
 		if (!attribute) {
-			return false;
+			return null;
 		}
 
 		attribute.setNextAttribute(this.m_pAttributes);
@@ -63,7 +63,7 @@ export class DmElement {
 		return attribute;
 	}
 
-	hasAttribute(attributeName: string, attributeType: DmAttributeType) {
+	hasAttribute(attributeName: string, attributeType: DmAttributeType): boolean {
 		//attributeType = typeof attributeType !== 'undefined' ? attributeType : DmAttributeType.Unknown;
 
 		const attribute = this.findAttribute(attributeName);
@@ -90,7 +90,7 @@ export class DmElement {
 		return NULL;*/
 	}
 
-	setAttributeValue(attributeName: string, value: any) {
+	setAttributeValue(attributeName: string, value: any): void {
 		if (this.m_pAttributes) {
 			const attribute = this.m_pAttributes.findAttribute(attributeName);
 			if (attribute) {
@@ -99,7 +99,7 @@ export class DmElement {
 		}
 	}
 
-	markDirty() {
+	markDirty(): void {
 		//dirty = typeof dirty !== 'undefined' ? dirty : true;
 		this.#m_bDirty = true;
 		/*{
@@ -112,7 +112,7 @@ export class DmElement {
 	}
 
 
-	getHandle() {
+	getHandle(): number {
 		if (this.m_ref.elementHandle == DMELEMENT_HANDLE_INVALID) {
 			console.error('Invalid handle');
 			//TODO
@@ -120,15 +120,15 @@ export class DmElement {
 		return this.m_ref.elementHandle;
 	}
 
-	getId() {
+	getId(): UniqueId {
 		return this.m_Id;
 	}
 
-	firstAttribute() {
+	firstAttribute(): DmAttribute | null {
 		return this.m_pAttributes;
 	}
 
-	getTypeString() {
+	getTypeString(): string {
 		return this.m_Type;//DataModel.getString( m_Type );TODO
 	}
 }

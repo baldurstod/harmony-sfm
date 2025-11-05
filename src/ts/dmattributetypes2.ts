@@ -1,55 +1,47 @@
 import { DmAttribute } from './dmattribute';
 import { DmAttributeType } from './dmattributetypes';
 
-
-
-function DECLARE_ATTRIBUTE_TYPE(_className: string, _attributeType: number, _attributeName: string, _defaultSetStatement: string) {
+function DECLARE_ATTRIBUTE_TYPE(_className: string, _attributeType: number, _attributeName: string, _defaultSetStatement: string): void {
 	DECLARE_ATTRIBUTE_TYPE_INTERNAL(_className, _className, _attributeType, _attributeName, _defaultSetStatement);
 }
 
-function DECLARE_ATTRIBUTE_ARRAY_TYPE(_className: string, _attributeType: number, _attributeName: string) {
+function DECLARE_ATTRIBUTE_ARRAY_TYPE(_className: string, _attributeType: number, _attributeName: string): void {
 	DECLARE_ATTRIBUTE_TYPE_INTERNAL(_className, _className, _attributeType, _attributeName);
 }
 //DmAttribute.s_pAttrInfo = DmAttribute.s_pAttrInfo ?? [];//TODO: fix this shit
 
-function DECLARE_ATTRIBUTE_TYPE_INTERNAL(_className: string, _storageType: string, _attributeType: number, _attributeName: string, _defaultSetStatement?: string) {
+function DECLARE_ATTRIBUTE_TYPE_INTERNAL(_className: string, _storageType: string, _attributeType: number, _attributeName: string, _defaultSetStatement?: string): void {
 	const t = new DmAttributeInfo(_className, _storageType, _attributeType, _attributeName, _defaultSetStatement);
 	DmAttribute.s_pAttrInfo[_attributeType] = t;
 }
 
-function DECLARE_ATTRIBUTE_ARRAY_TYPE_INTERNAL(_className: string, _storageType: string, _attributeType: number, _attributeName: string) {
+function DECLARE_ATTRIBUTE_ARRAY_TYPE_INTERNAL(_className: string, _storageType: string, _attributeType: number, _attributeName: string): void {
 	const t = new DmAttributeInfo(_className, _storageType, _attributeType, _attributeName);
 	DmAttribute.s_pAttrInfo[_attributeType] = t;
 }
 
 export class DmAttributeInfo {
-	ATTRIBUTE_TYPE;
-	attributeType;
-	attributeName;
-	defaultSetStatement;
+	readonly attributeType;
+	readonly attributeName;
+	readonly defaultSetStatement;
 
-	constructor(_className: string, _storageType: string, _attributeType: number, _attributeName: string, _defaultSetStatement?: string) {
-		this.ATTRIBUTE_TYPE = _attributeType;
+	constructor(_className: string, _storageType: string, _attributeType: DmAttributeType, _attributeName: string, _defaultSetStatement?: string) {
 		this.attributeType = _attributeType;
 		this.attributeName = _attributeName;
 		this.defaultSetStatement = _defaultSetStatement;
 	}
 
-	getAttributeType() {
+	getAttributeType(): DmAttributeType {
 		return this.attributeType;
 	}
 
-	getAttributeTypeName() {
+	getAttributeTypeName(): string {
 		return this.attributeName;
 	}
-
-
-
 	/*typedef _storageType StorageType_t;									\
 	static DmAttributeType_t AttributeType() { return _attributeType; }	\
 	static const char *AttributeTypeName() { return _attributeName; }	\
 	static void SetDefaultValue( _className& value ) { _defaultSetStatement }	\	*/
-
 }
 
 

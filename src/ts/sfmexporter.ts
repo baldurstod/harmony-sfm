@@ -4,11 +4,11 @@ import { DmAttributeType } from './dmattributetypes';
 import { LookAt, SfmSession } from './sfmsession';
 
 export class SfmExporter {
-	static async exportSFM(scene: Scene, mapName: string, rollAngle: number) {
+	static async exportSFM(scene: Scene, mapName: string, rollAngle: number): Promise<File> {
 		const originDelta = vec3.fromValues(0, -300, -192);
 		const originQuat = quat.create()// = [0, 0, -1, 1];
 		const sfm = new SfmSession(mapName);
-		await sfm.getDefaultAnimationGroups();
+		sfm.getDefaultAnimationGroups();
 
 		//originQuat = originQuat ?? quat.create();
 
@@ -31,7 +31,7 @@ export class SfmExporter {
 		}
 
 
-		const lookAt = [0, 0, 128]; //TODO
+		//const lookAt = [0, 0, 128]; //TODO
 		const lookAtPelvis = vec3.fromValues(0, -300, -128); //TODO
 		//
 
@@ -61,6 +61,7 @@ export class SfmExporter {
 		*/
 
 		//var lookAt = [0, -300, -128]; //TODO
+		/*
 		const l1Pos = [-196.7075195313, 246.0994567871, 262.7200927734];
 		const l1Quat = [-0.0684939995, -0.2947397232, 0.2157444805, -0.9283810854];
 
@@ -69,6 +70,7 @@ export class SfmExporter {
 
 		const l3Pos = [17.8041305542, -219.0653686523, 159.2713775635];
 		const l3Quat = [-0.0429456867, 0.0417843573, 0.7154440284, 0.6960959435];
+		*/
 
 		//var lookAtPelvis = vec3.fromValues(0, -300, -128); //TODO
 
@@ -86,11 +88,13 @@ export class SfmExporter {
 			vec3.fromValues(-34.4035644531, -196.7563476563, -93.8829574585),
 		];
 
+		/*
 		const lights1 = [
 			[108.68643188476562, -56.833984375, 152.0338897705078],
 			[-88.2010192871, -406.6763916016, -143.8958282471],
 			[-34.4035644531, -196.7563476563, -93.8829574585],
 		];
+		*/
 
 		//var keyPos = [108.6864318848, -356.833984375, -39.9661140442];
 		//var fillPos = [-88.2010192871, -406.6763916016, -143.8958282471];
@@ -136,7 +140,7 @@ export class SfmExporter {
 		return new File([sfm.out()], 'loadout.tf_SFM_session.dmx');
 	}
 
-	static async ExportSFMCharacter(sfm: SfmSession, prop: Source1ModelInstance, name: string, originDelta: vec3, originQuat: quat) {
+	static async ExportSFMCharacter(sfm: SfmSession, prop: Source1ModelInstance, name: string, originDelta: vec3, originQuat: quat): Promise<void> {
 		const modelReplace: Record<string, string> = {
 			// decorated weapons
 			'models/weapons/c_models/c_scattergun.mdl': 'models/weapons/c_models/c_scattergun/c_scattergun_decorated.mdl',
@@ -194,12 +198,12 @@ export class SfmExporter {
 			{
 				const textureList = prop.sourceModel.mdl.textures;//TODOV2
 				if (textureList) {
-					for (let textureIndex = 0; textureIndex < textureList.length; ++textureIndex) {
+					for (const texture of textureList) {
 						const materialName = prop.sourceModel.mdl.getMaterialName(Number(prop.skin), 0);//TODO
 						//var mat = SourceEngine.Materials.MaterialManager.getMaterial(materialName, prop.sourceModel.mdl.getTextureDir(), prop.sourceModel.materialRepository);
-						const mat = await Source1MaterialManager.getMaterial(prop.sourceModel.repository, materialName, prop.sourceModel.mdl.getTextureDir());
+						await Source1MaterialManager.getMaterial(prop.sourceModel.repository, materialName, prop.sourceModel.mdl.getTextureDir());
 
-						const textureName = textureList[textureIndex]!.name;
+						const textureName = texture.name;
 						//var textureName = mat.materialName;
 
 						//console.log(itemModel);
@@ -215,7 +219,7 @@ export class SfmExporter {
 							const result = /stattrack_dial(\d*)$/.exec(textureName);
 							if (result && result[1]) {
 								const digitPos = parseInt(result[1], 10);
-								const s = '000000' + (prop.getProperty('weapon_stattrak_kill_count') ?? 0).toString();
+								const s = '000000' + (prop.getProperty('weapon_stattrak_kill_count')?.value as number ?? 0).toString();
 								const startPos = s.length - 1 - digitPos;
 								const digit = parseInt(s[startPos]!, 10);
 								//console.log(result);
@@ -247,7 +251,7 @@ export class SfmExporter {
 }
 
 
-function ColorFloatToVec4(color: vec4) {
+function ColorFloatToVec4(color: vec4): vec4 {
 	if (!color) {
 		return vec4.fromValues(255, 255, 255, 255);
 	}

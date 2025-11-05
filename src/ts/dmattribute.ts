@@ -87,11 +87,11 @@ export class DmAttribute {
 		return null;
 	}
 
-	nextAttribute() {
+	nextAttribute(): DmAttribute | null {
 		return this.next;
 	}
 
-	isFlagSet(flags: number) {
+	isFlagSet(flags: number): boolean {
 		return (flags & this.m_nFlags) ? true : false;
 	}
 
@@ -104,7 +104,7 @@ export class DmAttribute {
 		return this.value as DmAttributeValue;
 	}
 
-	pushValue(value: DmAttributeValue | null) {
+	pushValue(value: DmAttributeValue | null): void {
 		//TODO: check value type ?
 		if (this.type < DmAttributeTypeFirstArray) {
 			console.error('Trying to push value in non array attribute');
@@ -165,14 +165,14 @@ export class DmAttribute {
 	}
 
 	#serialize(value: DmAttributeValue, buf: UtlBuffer): boolean {
-		const type = this.type % (DmAttributeTypeFirstArray - 1);
+		const type = this.type % (DmAttributeTypeFirstArray - 1) as DmAttributeValue;
 		switch (type) {
 			case DmAttributeType.String:
 				buf.putDelimitedString(value as string);
 				return buf.isValid();
 			case DmAttributeType.Float:
 			case DmAttributeType.Int:
-				buf.putString(String(value));
+				buf.putString(String(value as number));
 				return buf.isValid();
 			case DmAttributeType.Bool:
 				buf.putString(value ? '1' : '0');
@@ -198,7 +198,7 @@ export class DmAttribute {
 		return false
 	}
 
-	serializesOnMultipleLines() {
+	serializesOnMultipleLines(): boolean {
 		return false;
 		//TODO
 	}
@@ -221,8 +221,8 @@ export class DmAttribute {
 
 
 //DmAttribute.s_pAttrInfo = DmAttribute.s_pAttrInfo ?? [];//TODO: fix this shit
-export function AttributeTypeName(type: number) {
-	if ((type >= 0) && (type <= DmAttributeTypeLastArray)) {
+export function AttributeTypeName(type: DmAttributeType): string {
+	if ((type >= DmAttributeType.Unknown) && (type <= DmAttributeTypeLastArray)) {
 		return DmAttribute.s_pAttrInfo[type]!.getAttributeTypeName();
 	}
 	return 'unknown';

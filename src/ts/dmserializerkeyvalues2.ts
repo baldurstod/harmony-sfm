@@ -8,6 +8,7 @@ import { UtlBuffer } from './utlbuffer';
 import { Serialize, SetSerializationDelimiter, SetSerializationArrayDelimiter } from './utlbufferutil';
 
 
+/*
 const TOKEN_INVALID = -1;			// A bogus token
 const TOKEN_OPEN_BRACE = 0;		// {
 const TOKEN_CLOSE_BRACE = 1;		// }
@@ -18,6 +19,7 @@ const TOKEN_COMMA = 4;			// ,
 const TOKEN_DELIMITED_STRING = 5;	// Any quoted string
 const TOKEN_INCLUDE = 6;			// #include
 const TOKEN_EOF = 7;				// End of buffer
+*/
 
 export class DmSerializerKeyValues2 {
 	#flatMode: boolean;
@@ -34,27 +36,27 @@ export class DmSerializerKeyValues2 {
 
 	//enum TokenType_t
 
-	getName() {
+	getName(): string {
 		return this.#flatMode ? 'keyvalues2_flat' : 'keyvalues2';
 	}
 
-	getDescription() {
+	getDescription(): string {
 		return this.#flatMode ? 'KeyValues2 (flat)' : 'KeyValues2';
 	}
 
-	storesVersionInFile() {
+	storesVersionInFile(): boolean {
 		return true;
 	}
 
-	isBinaryFormat() {
+	isBinaryFormat(): boolean {
 		return false;
 	}
 
-	getCurrentVersion() {
+	getCurrentVersion(): number {
 		return 1;
 	}
 
-	serialize(outBuf: UtlBuffer, root: DmElement) {
+	serialize(outBuf: UtlBuffer, root: DmElement): boolean {
 		//SetSerializationDelimiter(GetCStringCharConversion());
 		//SetSerializationArrayDelimiter(',');TODO
 
@@ -78,7 +80,7 @@ export class DmSerializerKeyValues2 {
 	}
 
 	//bool CDmSerializerKeyValues2::SaveElement( CUtlBuffer& buf, CDmElementSerializationDictionary &dict, CDmElement *pElement, bool bWriteDelimiters )
-	saveElement(buf: UtlBuffer, dict: DmElementSerializationDictionary, pElement: DmElement | undefined, bWriteDelimiters = true) {
+	saveElement(buf: UtlBuffer, dict: DmElementSerializationDictionary, pElement: DmElement | null, bWriteDelimiters = true): boolean {
 		if (!pElement) {
 			return false;
 		}
@@ -105,7 +107,7 @@ export class DmSerializerKeyValues2 {
 		return true;
 	}
 
-	serializeAttributes(buf: UtlBuffer, dict: DmElementSerializationDictionary, pElement: DmElement) {
+	serializeAttributes(buf: UtlBuffer, dict: DmElementSerializationDictionary, pElement: DmElement): boolean {
 		const attributes = [];
 		for (let pAttribute = pElement.firstAttribute(); pAttribute; pAttribute = pAttribute.nextAttribute()) {
 			if (pAttribute.isFlagSet(FATTRIB_DONTSAVE)) {
@@ -188,7 +190,7 @@ export class DmSerializerKeyValues2 {
 		}
 	}
 
-	#serializeElementArrayAttribute(buf: UtlBuffer, dict: DmElementSerializationDictionary, pAttribute: DmAttribute) {
+	#serializeElementArrayAttribute(buf: UtlBuffer, dict: DmElementSerializationDictionary, pAttribute: DmAttribute): void {
 		const array = pAttribute.getValue() as DmElement[];
 
 		buf.putString('\n[\n');
@@ -223,7 +225,7 @@ export class DmSerializerKeyValues2 {
 		buf.putChar(']');
 	}
 
-	serializeArrayAttribute(buf: UtlBuffer, pAttribute: DmAttribute) {
+	serializeArrayAttribute(buf: UtlBuffer, pAttribute: DmAttribute): void {
 		const array = pAttribute.getValue() as [];
 
 		buf.putString('\n[\n');
@@ -265,7 +267,9 @@ export class DmSerializerKeyValues2 {
 			const char *pSourceFormatName, int nSourceFormatVersion,
 			DmFileId_t fileid, DmConflictResolution_t idConflictResolution, CDmElement **ppRoot
 	 */
+	/*
 	unserialize(/*bufferconst, encodingName, encodingVersion,
-		sourceFormatName, sourceFormatVersion, fileId, idConflictResolution, root*/) {
+		sourceFormatName, sourceFormatVersion, fileId, idConflictResolution, root* /) {
 	}
+	*/
 }
