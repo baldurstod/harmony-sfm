@@ -1,4 +1,4 @@
-import { DmAttribute } from './dmattribute';
+import { DmAttribute, DmAttributeValue } from './dmattribute';
 import { DmAttributeType } from './dmattributetypes';
 import { DmElementReference } from './dmelementreference';
 import { UniqueId } from './uniqueid';
@@ -36,10 +36,10 @@ export class DmElement {
 	}
 
 	//CDmAttribute *CDmElement::CreateAttribute( const char *pAttributeName, DmAttributeType_t type )
-	createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue: any): DmAttribute | null {
+	createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue?: DmAttributeValue | null): DmAttribute | null {
 		if (this.hasAttribute(attributeName, attributeType)) {
 			const attribute = this.findAttribute(attributeName);
-			if (attribute) {
+			if (attribute && attributeValue !== undefined) {
 				attribute.setValue(attributeValue);
 			}
 			//TODO
@@ -55,7 +55,7 @@ export class DmElement {
 		attribute.setNextAttribute(this.m_pAttributes);
 		this.m_pAttributes = attribute;
 
-		if (typeof attributeValue !== 'undefined') {
+		if (attributeValue !== undefined) {
 			attribute.setValue(attributeValue);
 		}
 

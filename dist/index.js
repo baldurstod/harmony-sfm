@@ -194,8 +194,10 @@ class DmAttribute {
         return (flags & this.m_nFlags) ? true : false;
     }
     setValue(value) {
-        /* TODO check value / type*/
-        this.value = value;
+        if (this.type < DmAttributeTypeFirstArray) {
+            /* TODO check value / type*/
+            this.value = value;
+        }
     }
     getValue() {
         return this.value;
@@ -482,7 +484,7 @@ class DmElement {
     createAttribute(attributeName, attributeType, attributeValue) {
         if (this.hasAttribute(attributeName, attributeType)) {
             const attribute = this.findAttribute(attributeName);
-            if (attribute) {
+            if (attribute && attributeValue !== undefined) {
                 attribute.setValue(attributeValue);
             }
             //TODO
@@ -495,7 +497,7 @@ class DmElement {
         }
         attribute.setNextAttribute(this.m_pAttributes);
         this.m_pAttributes = attribute;
-        if (typeof attributeValue !== 'undefined') {
+        if (attributeValue !== undefined) {
             attribute.setValue(attributeValue);
         }
         //g_pDataModelImp->NotifyState( NOTIFY_CHANGE_TOPOLOGICAL );
@@ -1290,7 +1292,7 @@ class SfmSession {
         movieSettings.createAttribute('filename', DmAttributeType.String, null);
         //////////////////////////////////////////////////////////////////////////////////////////
         const sharedPresetGroupSettings = DataModel.createElement(undefined, 'DmElement', 'sharedPresetGroupSettings');
-        sharedPresetGroupSettings.createAttribute('presetGroupInfos', DmAttributeType.ElementArray, null);
+        sharedPresetGroupSettings.createAttribute('presetGroupInfos', DmAttributeType.ElementArray);
         dmeSettings.createAttribute('graphEditorState', DmAttributeType.Element, graphEditorState);
         dmeSettings.createAttribute('proceduralPresets', DmAttributeType.Element, proceduralPresets);
         dmeSettings.createAttribute('renderSettings', DmAttributeType.Element, renderSettings);

@@ -96,7 +96,7 @@ declare class DmElement {
     m_Id: UniqueId;
     m_fileId?: never;
     constructor(handle: number, pElementType: string, id: UniqueId, pElementName: string, fileid?: never);
-    createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue: any): DmAttribute | null;
+    createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue?: DmAttributeValue | null): DmAttribute | null;
     hasAttribute(attributeName: string, attributeType: DmAttributeType): boolean;
     findAttribute(attributeName: string): DmAttribute | null;
     setAttributeValue(attributeName: string, value: any): void;

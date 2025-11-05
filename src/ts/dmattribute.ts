@@ -96,8 +96,10 @@ export class DmAttribute {
 	}
 
 	setValue(value: DmAttributeValue | null): void {
-		/* TODO check value / type*/
-		this.value = value;
+		if (this.type < DmAttributeTypeFirstArray) {
+			/* TODO check value / type*/
+			this.value = value;
+		}
 	}
 
 	getValue(): DmAttributeValue | null {

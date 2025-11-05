@@ -129,7 +129,7 @@ export class SfmSession {
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const sharedPresetGroupSettings = DataModel.createElement(undefined, 'DmElement', 'sharedPresetGroupSettings');
-		sharedPresetGroupSettings.createAttribute('presetGroupInfos', DmAttributeType.ElementArray, null);
+		sharedPresetGroupSettings.createAttribute('presetGroupInfos', DmAttributeType.ElementArray);
 
 
 		dmeSettings.createAttribute('graphEditorState', DmAttributeType.Element, graphEditorState);
