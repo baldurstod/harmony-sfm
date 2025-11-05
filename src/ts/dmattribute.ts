@@ -29,10 +29,6 @@ export class DmAttribute {
 		this.type = type;
 		this.m_nFlags = 0;
 
-		if (type >= DmAttributeTypeFirstArray) {
-			this.value = [];
-		}
-
 		switch (type) {
 			case DmAttributeType.Element:
 			case DmAttributeType.ElementArray:
@@ -96,10 +92,8 @@ export class DmAttribute {
 	}
 
 	setValue(value: DmAttributeValue | null): void {
-		if (this.type < DmAttributeTypeFirstArray) {
-			/* TODO check value / type*/
-			this.value = value;
-		}
+		/* TODO check value / type*/
+		this.value = value;
 	}
 
 	getValue(): DmAttributeValue | null {
@@ -112,6 +106,7 @@ export class DmAttribute {
 			console.error('Trying to push value in non array attribute');
 		}
 
+		this.value = this.value || [];
 		(this.value as any[]).push(value);
 	}
 

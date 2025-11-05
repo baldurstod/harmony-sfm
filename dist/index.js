@@ -141,9 +141,6 @@ class DmAttribute {
         this.name = name;
         this.type = type;
         this.m_nFlags = 0;
-        if (type >= DmAttributeTypeFirstArray) {
-            this.value = [];
-        }
         switch (type) {
             case DmAttributeType.Element:
             case DmAttributeType.ElementArray:
@@ -194,10 +191,8 @@ class DmAttribute {
         return (flags & this.m_nFlags) ? true : false;
     }
     setValue(value) {
-        if (this.type < DmAttributeTypeFirstArray) {
-            /* TODO check value / type*/
-            this.value = value;
-        }
+        /* TODO check value / type*/
+        this.value = value;
     }
     getValue() {
         return this.value;
@@ -207,6 +202,7 @@ class DmAttribute {
         if (this.type < DmAttributeTypeFirstArray) {
             console.error('Trying to push value in non array attribute');
         }
+        this.value = this.value || [];
         this.value.push(value);
     }
     serialize(buf) {
