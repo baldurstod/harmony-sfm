@@ -164,7 +164,7 @@ export class DmAttribute {
 				return buf.isValid();
 			case DmAttributeType.Float:
 			case DmAttributeType.Int:
-				buf.putString(String(value as number));
+				buf.putString(String(value as number ?? 0));
 				return buf.isValid();
 			case DmAttributeType.Bool:
 				buf.putString(value ? '1' : '0');

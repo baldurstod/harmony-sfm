@@ -256,7 +256,7 @@ class DmAttribute {
                 return buf.isValid();
             case DmAttributeType.Float:
             case DmAttributeType.Int:
-                buf.putString(String(value));
+                buf.putString(String(value ?? 0));
                 return buf.isValid();
             case DmAttributeType.Bool:
                 buf.putString(value ? '1' : '0');
