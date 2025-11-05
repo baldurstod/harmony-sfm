@@ -638,7 +638,7 @@ export class SfmSession {
 		if (gameModel) {
 			const materials = gameModel.findAttribute('materials');
 			if (materials) {
-				materials.setValue((materials.getValue() as DmElement[]).push(material));//TODO
+				materials.setValue((materials.getValue() as DmElement[]).concat(material));//TODO
 			} else {
 				gameModel.createAttribute('materials', DmAttributeType.ElementArray, [material]);
 			}

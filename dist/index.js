@@ -1709,7 +1709,7 @@ class SfmSession {
         if (gameModel) {
             const materials = gameModel.findAttribute('materials');
             if (materials) {
-                materials.setValue(materials.getValue().push(material)); //TODO
+                materials.setValue(materials.getValue().concat(material)); //TODO
             }
             else {
                 gameModel.createAttribute('materials', DmAttributeType.ElementArray, [material]);
