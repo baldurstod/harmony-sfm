@@ -239,19 +239,14 @@ class DmAttribute {
                 //TODO;
         }
         */
-        const value = this.getValue();
-        if (value !== undefined && value !== null) {
-            this.#serialize(value, buf);
-        }
+        this.#serialize(this.getValue(), buf);
     }
     serializeIndex(index, buf) {
         if (this.type < DmAttributeTypeFirstArray) {
             return;
         }
         const value = this.getValue()?.[index];
-        if (value) {
-            this.#serialize(value, buf);
-        }
+        this.#serialize(value, buf);
     }
     #serialize(value, buf) {
         const type = this.type % (DmAttributeTypeFirstArray - 1);

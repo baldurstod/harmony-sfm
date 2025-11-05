@@ -144,10 +144,7 @@ export class DmAttribute {
 				//TODO;
 		}
 		*/
-		const value = this.getValue();
-		if (value !== undefined && value !== null) {
-			this.#serialize(value, buf);
-		}
+		this.#serialize(this.getValue(), buf);
 	}
 
 	serializeIndex(index: number, buf: UtlBuffer): void {
@@ -156,12 +153,10 @@ export class DmAttribute {
 		}
 
 		const value = (this.getValue() as unknown as DmAttributeValueSingle[])?.[index];
-		if (value) {
-			this.#serialize(value, buf);
-		}
+		this.#serialize(value, buf);
 	}
 
-	#serialize(value: DmAttributeValue, buf: UtlBuffer): boolean {
+	#serialize(value: DmAttributeValue | null | undefined, buf: UtlBuffer): boolean {
 		const type = this.type % (DmAttributeTypeFirstArray - 1) as DmAttributeValue;
 		switch (type) {
 			case DmAttributeType.String:
