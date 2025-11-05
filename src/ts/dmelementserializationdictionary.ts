@@ -1,5 +1,5 @@
 import { FATTRIB_DONTSAVE } from './attributeflags';
-import { AT_ELEMENT, AT_ELEMENT_ARRAY } from './dmattributetypes';
+import { DmAttributeType } from './dmattributetypes';
 import { DmElement } from './dmelement';
 
 export const ELEMENT_DICT_HANDLE_INVALID = -1;
@@ -45,7 +45,7 @@ export class DmElementSerializationDictionary {
 	firstRootElement() {
 		const nCount = this.m_Dict2.length;
 		for (let h = 0; h < nCount; h++) {
-			if (this.m_Dict[this.m_Dict2[h]].m_bRoot) {
+			if (this.m_Dict[this.m_Dict2[h]!]?.m_bRoot) {
 				return h;
 			}
 		}
@@ -57,7 +57,7 @@ export class DmElementSerializationDictionary {
 		++h;
 		const nCount = this.m_Dict2.length;
 		for (; h < nCount; h++) {
-			if (this.m_Dict[this.m_Dict2[h]].m_bRoot) {
+			if (this.m_Dict[this.m_Dict2[h]!]?.m_bRoot) {
 				return h;
 			}
 		}
@@ -66,7 +66,7 @@ export class DmElementSerializationDictionary {
 
 	//CDmElement* GetRootElement( DmElementDictHandle_t h );
 	getRootElement(h: number) {
-		return this.m_Dict[this.m_Dict2[h]].m_pElement;
+		return this.m_Dict[this.m_Dict2[h]!]?.m_pElement;
 	}
 
 	// Finds the handle of the element
@@ -116,10 +116,10 @@ export class DmElementSerializationDictionary {
 				continue;
 			}
 
-			switch (pAttribute.getType()) {
-				case AT_ELEMENT:
+			switch (pAttribute.type) {
+				case DmAttributeType.Element:
 					{
-						var pChild = pAttribute.getValue();
+						const pChild = pAttribute.getValue() as DmElement;
 						/*if ( !pChild || pChild.GetFileId() != pElement.GetFileId()) {TODO
 							break;
 						}*/
@@ -128,13 +128,13 @@ export class DmElementSerializationDictionary {
 					}
 					break;
 
-				case AT_ELEMENT_ARRAY:
+				case DmAttributeType.ElementArray:
 					{
 						const array = pAttribute.getValue();
 						if (array instanceof Array) {
 							const nCount = array.length;
 							for (let i = 0; i < nCount; ++i) {
-								var pChild = array[i];
+								const pChild = array[i] as DmElement;
 								/*if (!pChild || pChild.GetFileId() != pElement.GetFileId()) {TODO
 									break;
 								}*/

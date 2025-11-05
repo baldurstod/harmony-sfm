@@ -1,6 +1,6 @@
 import { quat, vec3, vec4 } from 'gl-matrix';
 import { Property, Scene, Source1MaterialManager, Source1ModelInstance, Source1ParticleSystem } from 'harmony-3d';
-import { AT_COLOR, AT_INT } from './dmattributetypes';
+import { DmAttributeType } from './dmattributetypes';
 import { LookAt, SfmSession } from './sfmsession';
 
 export class SfmExporter {
@@ -99,7 +99,7 @@ export class SfmExporter {
 		for (let i = 0; i < lights.length; i++) {
 			//var lightPos = vec3.add(vec3.create(), lights[i], originDelta);
 			//lookAtPelvis = vec3.add(vec3.create(), lookAtPelvis, originDelta);
-			const lightPos = lights[i];
+			const lightPos = lights[i]!;
 
 			const light = sfm.addLight('light' + i, lightPos, LookAt(lightPos, lookAtPelvis, [0, 0, 1]))[0];
 			if (light) {
@@ -164,8 +164,9 @@ export class SfmExporter {
 		}
 		if (prop) {
 			let modelPath = prop.sourceModel.fileName.replace(/\.mdl$/, '') + '.mdl';
-			if (modelReplace[modelPath]) {
-				modelPath = modelReplace[modelPath];
+			const replacementModel = modelReplace[modelPath];
+			if (replacementModel) {
+				modelPath = replacementModel;
 			}
 
 			let modelOrigin = vec3.transformQuat(vec3.create(), prop.getWorldPosition(), originQuat);
@@ -198,7 +199,7 @@ export class SfmExporter {
 						//var mat = SourceEngine.Materials.MaterialManager.getMaterial(materialName, prop.sourceModel.mdl.getTextureDir(), prop.sourceModel.materialRepository);
 						const mat = await Source1MaterialManager.getMaterial(prop.sourceModel.repository, materialName, prop.sourceModel.mdl.getTextureDir());
 
-						const textureName = textureList[textureIndex].name;
+						const textureName = textureList[textureIndex]!.name;
 						//var textureName = mat.materialName;
 
 						//console.log(itemModel);
@@ -207,7 +208,7 @@ export class SfmExporter {
 						const tint = prop.getTint();
 						if (tint) {
 							const colorTintBase = ColorFloatToVec4(tint) ?? vec4.fromValues(255, 255, 255, 255);
-							overrideMaterial.createAttribute('$colortint_base', AT_COLOR, colorTintBase);
+							overrideMaterial.createAttribute('$colortint_base', DmAttributeType.Color, colorTintBase);
 						}
 
 						if (prop.getProperty('weapon_stattrak_kill_count')) {
@@ -216,9 +217,9 @@ export class SfmExporter {
 								const digitPos = parseInt(result[1], 10);
 								const s = '000000' + (prop.getProperty('weapon_stattrak_kill_count') ?? 0).toString();
 								const startPos = s.length - 1 - digitPos;
-								const digit = parseInt(s[startPos], 10);
+								const digit = parseInt(s[startPos]!, 10);
 								//console.log(result);
-								overrideMaterial.createAttribute('$frame', AT_INT, digit);
+								overrideMaterial.createAttribute('$frame', DmAttributeType.Int, digit);
 							}
 						}
 

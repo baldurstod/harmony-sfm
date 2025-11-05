@@ -5,7 +5,7 @@ import { JSONObject } from 'harmony-types';
 import SFM_DEFAULT_ANIMATION_GROUPS_URL from '../json/sfm_defaultanimationgroups.json';
 import { DataModel } from './datamodel';
 import { DmAttribute } from './dmattribute';
-import { AT_BOOL, AT_COLOR, AT_ELEMENT, AT_ELEMENT_ARRAY, AT_FIRST_ARRAY_TYPE, AT_FLOAT, AT_FLOAT_ARRAY, AT_INT, AT_INT_ARRAY, AT_QANGLE, AT_QUATERNION, AT_STRING, AT_STRING_ARRAY, AT_TIME, AT_TIME_ARRAY, AT_VECTOR2, AT_VECTOR3, AT_VECTOR4, AT_VMATRIX, AT_VOID } from './dmattributetypes';
+import { DmAttributeType, DmAttributeTypeFirstArray } from './dmattributetypes';
 import { DmElement } from './dmelement';
 import { DmSerializerKeyValues2 } from './dmserializerkeyvalues2';
 import { BufferFlags, UtlBuffer } from './utlbuffer';
@@ -20,7 +20,7 @@ let createFilmClipId = 0;
 
 const elementTemplates: Record<string, Record<string, any>> = {};
 
-export function LookAt(sourcePoint: vec3, destPoint: vec3, upVector: vec3) {
+export function LookAt(sourcePoint: vec3, destPoint: vec3, upVector: vec3): vec4 {
 	const z = vec3.sub(vec3.create(), destPoint, sourcePoint);
 	vec3.normalize(z, z);
 	const x = vec3.cross(vec3.create(), z, upVector);
@@ -62,82 +62,82 @@ export class SfmSession {
 		this.#populateSession(mapName, clipName);
 	}
 
-	#populateSession(mapName: string, clipName: string) {
+	#populateSession(mapName: string, clipName: string): void {
 		const dmeTimeSelection = this.#createDmeTimeSelection();
 		const dmeSettings = DataModel.createElement(undefined, 'DmElement');
-		dmeSettings.createAttribute('name', AT_STRING, 'sessionSettings');
-		dmeSettings.createAttribute('timeSelection', AT_ELEMENT, dmeTimeSelection);
+		dmeSettings.createAttribute('name', DmAttributeType.String, 'sessionSettings');
+		dmeSettings.createAttribute('timeSelection', DmAttributeType.Element, dmeTimeSelection);
 
 		const graphEditorState = DataModel.createElement(undefined, 'DmeGraphEditorState', 'graphEditorState');
-		graphEditorState.createAttribute('displayGrid', AT_BOOL, true);
+		graphEditorState.createAttribute('displayGrid', DmAttributeType.Bool, true);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const proceduralPresets = DataModel.createElement(undefined, 'DmeProceduralPresetSettings', 'proceduralPresets');
-		proceduralPresets.createAttribute('jitterscale', AT_FLOAT, 1);
-		proceduralPresets.createAttribute('smoothscale', AT_FLOAT, 1);
-		proceduralPresets.createAttribute('jitterscale_vector', AT_FLOAT, 2.5);
-		proceduralPresets.createAttribute('smoothscale_vector', AT_FLOAT, 2.5);
-		proceduralPresets.createAttribute('jitteriterations', AT_INT, 5);
-		proceduralPresets.createAttribute('smoothiterations', AT_INT, 5);
-		proceduralPresets.createAttribute('staggerinterval', AT_TIME, 0.0833);
+		proceduralPresets.createAttribute('jitterscale', DmAttributeType.Float, 1);
+		proceduralPresets.createAttribute('smoothscale', DmAttributeType.Float, 1);
+		proceduralPresets.createAttribute('jitterscale_vector', DmAttributeType.Float, 2.5);
+		proceduralPresets.createAttribute('smoothscale_vector', DmAttributeType.Float, 2.5);
+		proceduralPresets.createAttribute('jitteriterations', DmAttributeType.Int, 5);
+		proceduralPresets.createAttribute('smoothiterations', DmAttributeType.Int, 5);
+		proceduralPresets.createAttribute('staggerinterval', DmAttributeType.Time, 0.0833);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const renderSettings = DataModel.createElement(undefined, 'DmElement', 'renderSettings');
-		renderSettings.createAttribute('frameRate', AT_FLOAT, 24);
-		renderSettings.createAttribute('lightAverage', AT_INT, 0);
-		renderSettings.createAttribute('modelLod', AT_INT, 0);
-		renderSettings.createAttribute('engineCameraEffects', AT_BOOL, 0);
-		renderSettings.createAttribute('ambientOcclusionMode', AT_INT, 1);
-		renderSettings.createAttribute('showAmbientOcclusion', AT_INT, 0);
-		renderSettings.createAttribute('drawGameRenderablesMask', AT_INT, 216);
-		renderSettings.createAttribute('drawToolRenderablesMask', AT_INT, 15);
-		renderSettings.createAttribute('toneMapScale', AT_FLOAT, 1);
+		renderSettings.createAttribute('frameRate', DmAttributeType.Float, 24);
+		renderSettings.createAttribute('lightAverage', DmAttributeType.Int, 0);
+		renderSettings.createAttribute('modelLod', DmAttributeType.Int, 0);
+		renderSettings.createAttribute('engineCameraEffects', DmAttributeType.Bool, 0);
+		renderSettings.createAttribute('ambientOcclusionMode', DmAttributeType.Int, 1);
+		renderSettings.createAttribute('showAmbientOcclusion', DmAttributeType.Int, 0);
+		renderSettings.createAttribute('drawGameRenderablesMask', DmAttributeType.Int, 216);
+		renderSettings.createAttribute('drawToolRenderablesMask', DmAttributeType.Int, 15);
+		renderSettings.createAttribute('toneMapScale', DmAttributeType.Float, 1);
 		const ProgressiveRefinement = DataModel.createElement(undefined, 'DmElement', 'ProgressiveRefinementSettings');
-		ProgressiveRefinement.createAttribute('on', AT_BOOL, true);
-		ProgressiveRefinement.createAttribute('useDepthOfField', AT_BOOL, true);
-		ProgressiveRefinement.createAttribute('overrideDepthOfFieldQuality', AT_BOOL, false);
-		ProgressiveRefinement.createAttribute('overrideDepthOfFieldQualityValue', AT_INT, 1);
-		ProgressiveRefinement.createAttribute('useMotionBlur', AT_BOOL, true);
-		ProgressiveRefinement.createAttribute('overrideMotionBlurQuality', AT_BOOL, false);
-		ProgressiveRefinement.createAttribute('overrideMotionBlurQualityValue', AT_INT, 1);
-		ProgressiveRefinement.createAttribute('useAntialiasing', AT_BOOL, true);
-		ProgressiveRefinement.createAttribute('overrideShutterSpeed', AT_BOOL, false);
-		ProgressiveRefinement.createAttribute('overrideShutterSpeedValue', AT_FLOAT, 0.020833334);
-		renderSettings.createAttribute('ProgressiveRefinement', AT_ELEMENT, ProgressiveRefinement);
+		ProgressiveRefinement.createAttribute('on', DmAttributeType.Bool, true);
+		ProgressiveRefinement.createAttribute('useDepthOfField', DmAttributeType.Bool, true);
+		ProgressiveRefinement.createAttribute('overrideDepthOfFieldQuality', DmAttributeType.Bool, false);
+		ProgressiveRefinement.createAttribute('overrideDepthOfFieldQualityValue', DmAttributeType.Int, 1);
+		ProgressiveRefinement.createAttribute('useMotionBlur', DmAttributeType.Bool, true);
+		ProgressiveRefinement.createAttribute('overrideMotionBlurQuality', DmAttributeType.Bool, false);
+		ProgressiveRefinement.createAttribute('overrideMotionBlurQualityValue', DmAttributeType.Int, 1);
+		ProgressiveRefinement.createAttribute('useAntialiasing', DmAttributeType.Bool, true);
+		ProgressiveRefinement.createAttribute('overrideShutterSpeed', DmAttributeType.Bool, false);
+		ProgressiveRefinement.createAttribute('overrideShutterSpeedValue', DmAttributeType.Float, 0.020833334);
+		renderSettings.createAttribute('ProgressiveRefinement', DmAttributeType.Element, ProgressiveRefinement);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const posterSettings = DataModel.createElement(undefined, 'DmElement', 'posterSettings');
-		posterSettings.createAttribute('width', AT_INT, 1920);
-		posterSettings.createAttribute('height', AT_INT, 1080);
-		posterSettings.createAttribute('DPI', AT_INT, 300);
-		posterSettings.createAttribute('units', AT_INT, 0);
-		posterSettings.createAttribute('constrainAspect', AT_BOOL, true);
-		posterSettings.createAttribute('heightInPixels', AT_BOOL, true);
-		posterSettings.createAttribute('widthInPixels', AT_BOOL, true);
-		posterSettings.createAttribute('format', AT_STRING, 'PNG');
+		posterSettings.createAttribute('width', DmAttributeType.Int, 1920);
+		posterSettings.createAttribute('height', DmAttributeType.Int, 1080);
+		posterSettings.createAttribute('DPI', DmAttributeType.Int, 300);
+		posterSettings.createAttribute('units', DmAttributeType.Int, 0);
+		posterSettings.createAttribute('constrainAspect', DmAttributeType.Bool, true);
+		posterSettings.createAttribute('heightInPixels', DmAttributeType.Bool, true);
+		posterSettings.createAttribute('widthInPixels', DmAttributeType.Bool, true);
+		posterSettings.createAttribute('format', DmAttributeType.String, 'PNG');
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const movieSettings = DataModel.createElement(undefined, 'DmElement', 'movieSettings');
-		movieSettings.createAttribute('videoTarget', AT_INT, 6);
-		movieSettings.createAttribute('audioTarget', AT_INT, 2);
-		movieSettings.createAttribute('stereoscopic', AT_BOOL, 0);
-		movieSettings.createAttribute('stereoSingleFile', AT_BOOL, 0);
-		movieSettings.createAttribute('clearDecals', AT_BOOL, 0);
-		movieSettings.createAttribute('width', AT_INT, 1280);
-		movieSettings.createAttribute('height', AT_INT, 720);
-		movieSettings.createAttribute('filename', AT_STRING, null);
+		movieSettings.createAttribute('videoTarget', DmAttributeType.Int, 6);
+		movieSettings.createAttribute('audioTarget', DmAttributeType.Int, 2);
+		movieSettings.createAttribute('stereoscopic', DmAttributeType.Bool, 0);
+		movieSettings.createAttribute('stereoSingleFile', DmAttributeType.Bool, 0);
+		movieSettings.createAttribute('clearDecals', DmAttributeType.Bool, 0);
+		movieSettings.createAttribute('width', DmAttributeType.Int, 1280);
+		movieSettings.createAttribute('height', DmAttributeType.Int, 720);
+		movieSettings.createAttribute('filename', DmAttributeType.String, null);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		const sharedPresetGroupSettings = DataModel.createElement(undefined, 'DmElement', 'sharedPresetGroupSettings');
-		sharedPresetGroupSettings.createAttribute('presetGroupInfos', AT_ELEMENT_ARRAY, null);
+		sharedPresetGroupSettings.createAttribute('presetGroupInfos', DmAttributeType.ElementArray, null);
 
 
-		dmeSettings.createAttribute('graphEditorState', AT_ELEMENT, graphEditorState);
-		dmeSettings.createAttribute('proceduralPresets', AT_ELEMENT, proceduralPresets);
-		dmeSettings.createAttribute('renderSettings', AT_ELEMENT, renderSettings);
-		dmeSettings.createAttribute('posterSettings', AT_ELEMENT, posterSettings);
-		dmeSettings.createAttribute('movieSettings', AT_ELEMENT, movieSettings);
-		dmeSettings.createAttribute('sharedPresetGroupSettings', AT_ELEMENT, sharedPresetGroupSettings);
+		dmeSettings.createAttribute('graphEditorState', DmAttributeType.Element, graphEditorState);
+		dmeSettings.createAttribute('proceduralPresets', DmAttributeType.Element, proceduralPresets);
+		dmeSettings.createAttribute('renderSettings', DmAttributeType.Element, renderSettings);
+		dmeSettings.createAttribute('posterSettings', DmAttributeType.Element, posterSettings);
+		dmeSettings.createAttribute('movieSettings', DmAttributeType.Element, movieSettings);
+		dmeSettings.createAttribute('sharedPresetGroupSettings', DmAttributeType.Element, sharedPresetGroupSettings);
 
 		this.animSetEditorChannels = this.createDmeTrack('animSetEditorChannels', [], CLIP_TYPE_CHANNEL);
 
@@ -167,81 +167,81 @@ export class SfmSession {
 			this.#createDmeTrackGroup('subClipTrackGroup', [subClipTrackGroupFilm]), undefined, undefined, undefined, mapName
 		);
 
-		this.#dmeSession.createAttribute('activeClip', AT_ELEMENT, activeClip);
-		this.#dmeSession.createAttribute('miscBin', AT_ELEMENT_ARRAY, null);
-		this.#dmeSession.createAttribute('cameraBin', AT_ELEMENT_ARRAY, null);
-		this.#dmeSession.createAttribute('clipBin', AT_ELEMENT_ARRAY, [activeClip]);
-		this.#dmeSession.createAttribute('name', AT_STRING, 'session');
-		this.#dmeSession.createAttribute('settings', AT_ELEMENT, dmeSettings);
-		/*dmeSession.createAttribute('graphEditorState', AT_ELEMENT, graphEditorState);
-		dmeSession.createAttribute('proceduralPresets', AT_ELEMENT, proceduralPresets);
-		dmeSession.createAttribute('renderSettings', AT_ELEMENT, renderSettings);
-		dmeSession.createAttribute('posterSettings', AT_ELEMENT, posterSettings);
-		dmeSession.createAttribute('movieSettings', AT_ELEMENT, movieSettings);
-		dmeSession.createAttribute('sharedPresetGroupSettings', AT_ELEMENT, sharedPresetGroupSettings);*/
+		this.#dmeSession.createAttribute('activeClip', DmAttributeType.Element, activeClip);
+		this.#dmeSession.createAttribute('miscBin', DmAttributeType.ElementArray, null);
+		this.#dmeSession.createAttribute('cameraBin', DmAttributeType.ElementArray, null);
+		this.#dmeSession.createAttribute('clipBin', DmAttributeType.ElementArray, [activeClip]);
+		this.#dmeSession.createAttribute('name', DmAttributeType.String, 'session');
+		this.#dmeSession.createAttribute('settings', DmAttributeType.Element, dmeSettings);
+		/*dmeSession.createAttribute('graphEditorState', DmAttributeType.Element, graphEditorState);
+		dmeSession.createAttribute('proceduralPresets', DmAttributeType.Element, proceduralPresets);
+		dmeSession.createAttribute('renderSettings', DmAttributeType.Element, renderSettings);
+		dmeSession.createAttribute('posterSettings', DmAttributeType.Element, posterSettings);
+		dmeSession.createAttribute('movieSettings', DmAttributeType.Element, movieSettings);
+		dmeSession.createAttribute('sharedPresetGroupSettings', DmAttributeType.Element, sharedPresetGroupSettings);*/
 	}
 
-	#createFilmClip(clipName: string, trackGroups: DmElement[] = [], subClipTrackGroup: DmElement | undefined, camera: never | undefined, scene: DmElement | undefined, animationSets: never[] | undefined = [], mapname: string) {
+	#createFilmClip(clipName: string, trackGroups: DmElement[] = [], subClipTrackGroup: DmElement | undefined, camera: never | undefined, scene: DmElement | undefined, animationSets: never[] | undefined = [], mapname: string): DmElement {
 		//animationSets = (animationSets instanceof Array) ? animationSets : [];
 		++createFilmClipId;
 		const dmeFilmClip = DataModel.createElement(undefined, 'DmeFilmClip', clipName/*'test' + CreateFilmClip.clipId*/);
-		dmeFilmClip.createAttribute('timeFrame', AT_ELEMENT, this.#createDmeTimeFrame());
-		dmeFilmClip.createAttribute('color', AT_COLOR, vec4.fromValues(0, 0, 0, 0)/*'0 255 0 255'*/);
-		dmeFilmClip.createAttribute('text', AT_STRING, '');
-		dmeFilmClip.createAttribute('mute', AT_BOOL, false);
+		dmeFilmClip.createAttribute('timeFrame', DmAttributeType.Element, this.#createDmeTimeFrame());
+		dmeFilmClip.createAttribute('color', DmAttributeType.Color, vec4.fromValues(0, 0, 0, 0)/*'0 255 0 255'*/);
+		dmeFilmClip.createAttribute('text', DmAttributeType.String, '');
+		dmeFilmClip.createAttribute('mute', DmAttributeType.Bool, false);
 
 		// Tracks
 		//trackGroups = (trackGroups instanceof Array) ? trackGroups : [];
 		//subClipTrackGroup = (subClipTrackGroup instanceof Array) ? subClipTrackGroup : [];
-		dmeFilmClip.createAttribute('trackGroups', AT_ELEMENT_ARRAY, trackGroups);
-		dmeFilmClip.createAttribute('displayScale', AT_FLOAT, 1);
-		dmeFilmClip.createAttribute('materialOverlay', AT_ELEMENT, null);
-		dmeFilmClip.createAttribute('mapname', AT_STRING, mapname);
-		dmeFilmClip.createAttribute('camera', AT_ELEMENT, camera);
-		dmeFilmClip.createAttribute('monitorCameras', AT_ELEMENT_ARRAY, []);
-		dmeFilmClip.createAttribute('activeMonitor', AT_INT, -1);
-		dmeFilmClip.createAttribute('scene', AT_ELEMENT, scene);
-		dmeFilmClip.createAttribute('aviFile', AT_STRING, null);
-		dmeFilmClip.createAttribute('fadeIn', AT_TIME, 0);
-		dmeFilmClip.createAttribute('fadeOut', AT_TIME, 0);
-		dmeFilmClip.createAttribute('inputs', AT_ELEMENT_ARRAY, null);
-		dmeFilmClip.createAttribute('operators', AT_ELEMENT_ARRAY, null);
-		dmeFilmClip.createAttribute('useAviFile', AT_BOOL, false);
-		dmeFilmClip.createAttribute('animationSets', AT_ELEMENT_ARRAY, animationSets);
-		dmeFilmClip.createAttribute('bookmarkSets', AT_ELEMENT_ARRAY, null);
-		dmeFilmClip.createAttribute('activeBookmarkSet', AT_INT, 0);
-		dmeFilmClip.createAttribute('subClipTrackGroup', AT_ELEMENT, subClipTrackGroup);
-		dmeFilmClip.createAttribute('volume', AT_FLOAT, 1);
-		dmeFilmClip.createAttribute('concommands', AT_STRING_ARRAY, null);
-		dmeFilmClip.createAttribute('convars', AT_STRING_ARRAY, null);
+		dmeFilmClip.createAttribute('trackGroups', DmAttributeType.ElementArray, trackGroups);
+		dmeFilmClip.createAttribute('displayScale', DmAttributeType.Float, 1);
+		dmeFilmClip.createAttribute('materialOverlay', DmAttributeType.Element, null);
+		dmeFilmClip.createAttribute('mapname', DmAttributeType.String, mapname);
+		dmeFilmClip.createAttribute('camera', DmAttributeType.Element, camera);
+		dmeFilmClip.createAttribute('monitorCameras', DmAttributeType.ElementArray, []);
+		dmeFilmClip.createAttribute('activeMonitor', DmAttributeType.Int, -1);
+		dmeFilmClip.createAttribute('scene', DmAttributeType.Element, scene);
+		dmeFilmClip.createAttribute('aviFile', DmAttributeType.String, null);
+		dmeFilmClip.createAttribute('fadeIn', DmAttributeType.Time, 0);
+		dmeFilmClip.createAttribute('fadeOut', DmAttributeType.Time, 0);
+		dmeFilmClip.createAttribute('inputs', DmAttributeType.ElementArray, null);
+		dmeFilmClip.createAttribute('operators', DmAttributeType.ElementArray, null);
+		dmeFilmClip.createAttribute('useAviFile', DmAttributeType.Bool, false);
+		dmeFilmClip.createAttribute('animationSets', DmAttributeType.ElementArray, animationSets);
+		dmeFilmClip.createAttribute('bookmarkSets', DmAttributeType.ElementArray, null);
+		dmeFilmClip.createAttribute('activeBookmarkSet', DmAttributeType.Int, 0);
+		dmeFilmClip.createAttribute('subClipTrackGroup', DmAttributeType.Element, subClipTrackGroup);
+		dmeFilmClip.createAttribute('volume', DmAttributeType.Float, 1);
+		dmeFilmClip.createAttribute('concommands', DmAttributeType.StringArray, null);
+		dmeFilmClip.createAttribute('convars', DmAttributeType.StringArray, null);
 
 		return dmeFilmClip;
 	}
 
-	out() {
+	out(): string {
 		const buf = new UtlBuffer(BufferFlags.TEXT_BUFFER);
 		new DmSerializerKeyValues2(false).serialize(buf, this.#dmeSession);
 		return buf.getBuffer();
 	}
 
-	#createDmeTimeSelection(name?: string) {
+	#createDmeTimeSelection(name?: string): DmElement {
 		const dmeTimeSelection = DataModel.createElement(undefined, 'DmeTimeSelection', name);
-		dmeTimeSelection.createAttribute('name', AT_STRING, 'timeSelection');
-		dmeTimeSelection.createAttribute('enabled', AT_BOOL, true);
-		dmeTimeSelection.createAttribute('relative', AT_BOOL, false);
-		dmeTimeSelection.createAttribute('falloff_left', AT_TIME, -214748.3647);
-		dmeTimeSelection.createAttribute('falloff_right', AT_TIME, 214748.3647);
-		dmeTimeSelection.createAttribute('hold_left', AT_TIME, -214748.3647);
-		dmeTimeSelection.createAttribute('hold_right', AT_TIME, 214748.3647);
-		dmeTimeSelection.createAttribute('interpolator_left', AT_INT, 6);
-		dmeTimeSelection.createAttribute('interpolator_right', AT_INT, 6);
-		dmeTimeSelection.createAttribute('threshold', AT_FLOAT, 0.0005);
-		dmeTimeSelection.createAttribute('resampleinterval', AT_TIME, 0.0100);
-		dmeTimeSelection.createAttribute('recordingstate', AT_INT, 2);
+		dmeTimeSelection.createAttribute('name', DmAttributeType.String, 'timeSelection');
+		dmeTimeSelection.createAttribute('enabled', DmAttributeType.Bool, true);
+		dmeTimeSelection.createAttribute('relative', DmAttributeType.Bool, false);
+		dmeTimeSelection.createAttribute('falloff_left', DmAttributeType.Time, -214748.3647);
+		dmeTimeSelection.createAttribute('falloff_right', DmAttributeType.Time, 214748.3647);
+		dmeTimeSelection.createAttribute('hold_left', DmAttributeType.Time, -214748.3647);
+		dmeTimeSelection.createAttribute('hold_right', DmAttributeType.Time, 214748.3647);
+		dmeTimeSelection.createAttribute('interpolator_left', DmAttributeType.Int, 6);
+		dmeTimeSelection.createAttribute('interpolator_right', DmAttributeType.Int, 6);
+		dmeTimeSelection.createAttribute('threshold', DmAttributeType.Float, 0.0005);
+		dmeTimeSelection.createAttribute('resampleinterval', DmAttributeType.Time, 0.0100);
+		dmeTimeSelection.createAttribute('recordingstate', DmAttributeType.Int, 2);
 		return dmeTimeSelection;
 	}
 
-	createDmeTrack(trackName: string, children: DmElement[] = [], clipType = 0) {
+	createDmeTrack(trackName: string, children: DmElement[] = [], clipType = 0): DmElement {
 		const dmeTrack = DataModel.createElement(undefined, 'DmeTrack', trackName);
 		//TODO
 		/*	var childList = [];
@@ -254,19 +254,19 @@ export class SfmSession {
 		//children = (children instanceof Array) ? children : [];
 		//clipType = (clipType === undefined) ? 0 : clipType;
 
-		dmeTrack.createAttribute('children', AT_ELEMENT_ARRAY, children);
+		dmeTrack.createAttribute('children', DmAttributeType.ElementArray, children);
 
-		dmeTrack.createAttribute('collapsed', AT_BOOL, false);
-		dmeTrack.createAttribute('mute', AT_BOOL, false);
-		dmeTrack.createAttribute('synched', AT_BOOL, true);
-		dmeTrack.createAttribute('clipType', AT_INT, clipType);
-		dmeTrack.createAttribute('volume', AT_FLOAT, 1);
-		dmeTrack.createAttribute('displayScale', AT_FLOAT, 1);
+		dmeTrack.createAttribute('collapsed', DmAttributeType.Bool, false);
+		dmeTrack.createAttribute('mute', DmAttributeType.Bool, false);
+		dmeTrack.createAttribute('synched', DmAttributeType.Bool, true);
+		dmeTrack.createAttribute('clipType', DmAttributeType.Int, clipType);
+		dmeTrack.createAttribute('volume', DmAttributeType.Float, 1);
+		dmeTrack.createAttribute('displayScale', DmAttributeType.Float, 1);
 
 		return dmeTrack;
 	}
 
-	createDmeCamera(cameraName: string, cameraPos: vec3, cameraLookAt: vec3, rollAngle: number) {
+	createDmeCamera(cameraName: string, cameraPos: vec3, cameraLookAt: vec3, rollAngle: number): DmElement {
 		rollAngle = rollAngle || 0;
 
 		const cameraOrientation = LookAt(cameraPos, cameraLookAt, [0, 0, 1]);
@@ -279,28 +279,28 @@ export class SfmSession {
 
 		const cameraTransform = this.#createDmeTransform(undefined, cameraPos, cameraOrientation);
 		const dmeCamera = DataModel.createElement(undefined, 'DmeCamera', cameraName);
-		dmeCamera.createAttribute('transform', AT_ELEMENT, cameraTransform);
+		dmeCamera.createAttribute('transform', DmAttributeType.Element, cameraTransform);
 
 		//TODO
 		return dmeCamera;
 	}
 
-	createDmeGlobalFlexControllerOperator(name: string, flexWeight: number, gameModel: DmElement) {
+	createDmeGlobalFlexControllerOperator(name: string, flexWeight: number, gameModel: DmElement): DmElement {
 		const dmeGlobalFlexControllerOperator = DataModel.createElement(undefined, 'DmeGlobalFlexControllerOperator', name);
-		dmeGlobalFlexControllerOperator.createAttribute('flexWeight', AT_FLOAT, flexWeight);
-		dmeGlobalFlexControllerOperator.createAttribute('gameModel', AT_ELEMENT, gameModel);
+		dmeGlobalFlexControllerOperator.createAttribute('flexWeight', DmAttributeType.Float, flexWeight);
+		dmeGlobalFlexControllerOperator.createAttribute('gameModel', DmAttributeType.Element, gameModel);
 		return dmeGlobalFlexControllerOperator;
 	}
 
-	createDmeDag(name: string, transform: DmElement, children: DmElement[] = []) {
+	createDmeDag(name: string, transform: DmElement, children: DmElement[] = []): DmElement {
 		const dmeDag = DataModel.createElement(undefined, 'DmeDag', name);
 
-		dmeDag.createAttribute('transform', AT_ELEMENT, transform);
-		dmeDag.createAttribute('shape', AT_ELEMENT, null);
-		dmeDag.createAttribute('visible', AT_BOOL, true);
+		dmeDag.createAttribute('transform', DmAttributeType.Element, transform);
+		dmeDag.createAttribute('shape', DmAttributeType.Element, null);
+		dmeDag.createAttribute('visible', DmAttributeType.Bool, true);
 
 		//children = (children instanceof Array) ? children : [];
-		dmeDag.createAttribute('children', AT_ELEMENT_ARRAY, children);
+		dmeDag.createAttribute('children', DmAttributeType.ElementArray, children);
 
 		/*'id' 'elementid' 'd992aa4f-2c4f-4324-9e00-e14727212fe9'
 		'name' 'string' 'Cameras'
@@ -324,14 +324,14 @@ export class SfmSession {
 		return dmeDag;
 	}
 
-	#createDmeTransform(name?: string, position = vec3.create(), orientation = quat.create(), scale?: number) {
+	#createDmeTransform(name?: string, position = vec3.create(), orientation = quat.create(), scale?: number): DmElement {
 
 		const dmeTransform = DataModel.createElement(undefined, 'DmeTransform', name);
 
-		dmeTransform.createAttribute('position', AT_VECTOR3, position);//TODO
-		dmeTransform.createAttribute('orientation', AT_QUATERNION, orientation);//TODO
+		dmeTransform.createAttribute('position', DmAttributeType.Vector3, position);//TODO
+		dmeTransform.createAttribute('orientation', DmAttributeType.Quaternion, orientation);//TODO
 		if (scale !== undefined) {
-			dmeTransform.createAttribute('scale', AT_FLOAT, scale);//TODO
+			dmeTransform.createAttribute('scale', DmAttributeType.Float, scale);//TODO
 		}
 
 		/*'position' 'vector3' '0 0 0'
@@ -340,20 +340,20 @@ export class SfmSession {
 		return dmeTransform;
 	}
 
-	#createDmeChannel(name: string, fromElement: DmElement, fromAttribute: string, fromIndex: number, toElement: DmElement, toAttribute: string, toIndex: number, mode: number) {
+	#createDmeChannel(name: string, fromElement: DmElement, fromAttribute: string, fromIndex: number, toElement: DmElement, toAttribute: string, toIndex: number, mode: number): DmElement {
 		const dmeChannel = DataModel.createElement(undefined, 'DmeChannel', name);
 
-		dmeChannel.createAttribute('fromElement', AT_ELEMENT, fromElement);
-		dmeChannel.createAttribute('fromAttribute', AT_STRING, fromAttribute);
-		dmeChannel.createAttribute('fromIndex', AT_INT, fromIndex);
+		dmeChannel.createAttribute('fromElement', DmAttributeType.Element, fromElement);
+		dmeChannel.createAttribute('fromAttribute', DmAttributeType.String, fromAttribute);
+		dmeChannel.createAttribute('fromIndex', DmAttributeType.Int, fromIndex);
 
-		dmeChannel.createAttribute('toElement', AT_ELEMENT, toElement);
-		dmeChannel.createAttribute('toAttribute', AT_STRING, toAttribute);
-		dmeChannel.createAttribute('toIndex', AT_INT, toIndex);
+		dmeChannel.createAttribute('toElement', DmAttributeType.Element, toElement);
+		dmeChannel.createAttribute('toAttribute', DmAttributeType.String, toAttribute);
+		dmeChannel.createAttribute('toIndex', DmAttributeType.Int, toIndex);
 
-		dmeChannel.createAttribute('mode', AT_INT, mode);
+		dmeChannel.createAttribute('mode', DmAttributeType.Int, mode);
 
-		dmeChannel.createAttribute('log', AT_ELEMENT, null);
+		dmeChannel.createAttribute('log', DmAttributeType.Element, null);
 
 		return dmeChannel;
 	}
@@ -362,41 +362,41 @@ export class SfmSession {
 		switch (type) {
 			/*
 
-			var AT_STRING = 5;
-			var AT_VOID = 6;
-			var AT_OBJECTID = 7;
-			var AT_TIME = 7;
-			var AT_COLOR = 8; //rgba
-			var AT_VECTOR2 = 9;
-			var AT_VECTOR3 = 10;
-			var AT_VECTOR4 = 11;
-			var AT_QANGLE = 12;
-			var AT_QUATERNION = 13;
-			var AT_VMATRIX = 14;
+			var DmAttributeType.String = 5;
+			var DmAttributeType.Void = 6;
+			var DmAttributeType.ObjectId = 7;
+			var DmAttributeType.Time = 7;
+			var DmAttributeType.Color = 8; //rgba
+			var DmAttributeType.Vector2 = 9;
+			var DmAttributeType.Vector3 = 10;
+			var DmAttributeType.Vector4 = 11;
+			var DmAttributeType.QAngle = 12;
+			var DmAttributeType.Quaternion = 13;
+			var DmAttributeType.VMatrix = 14;
 			*/
-			case AT_INT:
+			case DmAttributeType.Int:
 				return 'Int';
-			case AT_FLOAT:
+			case DmAttributeType.Float:
 				return 'Float';
-			case AT_BOOL:
+			case DmAttributeType.Bool:
 				return 'Bool';
-			case AT_STRING:
+			case DmAttributeType.String:
 				return 'String';
-			case AT_TIME:
+			case DmAttributeType.Time:
 				return 'Time';
-			case AT_COLOR:
+			case DmAttributeType.Color:
 				return 'Color';
-			case AT_VECTOR2:
+			case DmAttributeType.Vector2:
 				return 'Vector2';
-			case AT_VECTOR3:
+			case DmAttributeType.Vector3:
 				return 'Vector3';
-			case AT_VECTOR4:
+			case DmAttributeType.Vector4:
 				return 'Vector4';
-			case AT_QANGLE:
+			case DmAttributeType.QAngle:
 				return 'QAngle';
-			case AT_QUATERNION:
+			case DmAttributeType.Quaternion:
 				return 'Quaternion';
-			case AT_VMATRIX:
+			case DmAttributeType.VMatrix:
 				return 'VMatrix';
 		}
 		console.error('Unknown type in getTypeName ' + type);
@@ -412,17 +412,17 @@ export class SfmSession {
 
 		const dmeTypedLayer = this.#createDmeTypedLayer(type, name, times, values);
 
-		dmeTypedLog.createAttribute('layers', AT_ELEMENT_ARRAY, [dmeTypedLayer]);
+		dmeTypedLog.createAttribute('layers', DmAttributeType.ElementArray, [dmeTypedLayer]);
 
-		dmeTypedLog.createAttribute('curveinfo', AT_ELEMENT, null);
-		dmeTypedLog.createAttribute('usedefaultvalue', AT_BOOL, false);
+		dmeTypedLog.createAttribute('curveinfo', DmAttributeType.Element, null);
+		dmeTypedLog.createAttribute('usedefaultvalue', DmAttributeType.Bool, false);
 		dmeTypedLog.createAttribute('defaultvalue', type, null);
-		if ((type == AT_VECTOR3) || (type == AT_QUATERNION)) {
-			dmeTypedLog.createAttribute('bookmarksX', AT_TIME_ARRAY, []);
-			dmeTypedLog.createAttribute('bookmarksY', AT_TIME_ARRAY, []);
-			dmeTypedLog.createAttribute('bookmarksZ', AT_TIME_ARRAY, []);
+		if ((type == DmAttributeType.Vector3) || (type == DmAttributeType.Quaternion)) {
+			dmeTypedLog.createAttribute('bookmarksX', DmAttributeType.TimeArray, []);
+			dmeTypedLog.createAttribute('bookmarksY', DmAttributeType.TimeArray, []);
+			dmeTypedLog.createAttribute('bookmarksZ', DmAttributeType.TimeArray, []);
 		}
-		dmeTypedLog.createAttribute('bookmarks', AT_TIME_ARRAY, []);
+		dmeTypedLog.createAttribute('bookmarks', DmAttributeType.TimeArray, []);
 		return dmeTypedLog;
 	}
 
@@ -433,10 +433,10 @@ export class SfmSession {
 		const elementTypeName = 'Dme' + this.#getTypeName(type) + 'LogLayer';
 		const dmeTypedLayer = DataModel.createElement(undefined, elementTypeName, name);
 
-		dmeTypedLayer.createAttribute('times', AT_TIME_ARRAY, times);
-		dmeTypedLayer.createAttribute('curvetypes', AT_INT_ARRAY, []);
-		dmeTypedLayer.createAttribute('values', type + AT_FIRST_ARRAY_TYPE - 1, values);
-		dmeTypedLayer.createAttribute('compressed', AT_VOID, null);
+		dmeTypedLayer.createAttribute('times', DmAttributeType.TimeArray, times);
+		dmeTypedLayer.createAttribute('curvetypes', DmAttributeType.IntArray, []);
+		dmeTypedLayer.createAttribute('values', type + DmAttributeTypeFirstArray - 1, values);
+		dmeTypedLayer.createAttribute('compressed', DmAttributeType.Void, null);
 
 		return dmeTypedLayer;
 	}
@@ -444,15 +444,15 @@ export class SfmSession {
 	#createDmeChannelsClip(name: string, timeFrame: DmElement, channels: DmElement[]) {
 		const dmeChannelsClip = DataModel.createElement(undefined, 'DmeChannelsClip', name);
 
-		dmeChannelsClip.createAttribute('timeFrame', AT_ELEMENT, timeFrame);
-		dmeChannelsClip.createAttribute('color', AT_COLOR, vec4.fromValues(0, 0, 0, 0)/*'0 0 0 1'*/);//TODO
-		dmeChannelsClip.createAttribute('text', AT_STRING, '');//TODO
-		dmeChannelsClip.createAttribute('mute', AT_BOOL, false);//TODO
-		dmeChannelsClip.createAttribute('trackGroups', AT_ELEMENT_ARRAY, []);//TODO
-		dmeChannelsClip.createAttribute('displayScale', AT_FLOAT, 1);//TODO
+		dmeChannelsClip.createAttribute('timeFrame', DmAttributeType.Element, timeFrame);
+		dmeChannelsClip.createAttribute('color', DmAttributeType.Color, vec4.fromValues(0, 0, 0, 0)/*'0 0 0 1'*/);//TODO
+		dmeChannelsClip.createAttribute('text', DmAttributeType.String, '');//TODO
+		dmeChannelsClip.createAttribute('mute', DmAttributeType.Bool, false);//TODO
+		dmeChannelsClip.createAttribute('trackGroups', DmAttributeType.ElementArray, []);//TODO
+		dmeChannelsClip.createAttribute('displayScale', DmAttributeType.Float, 1);//TODO
 
 		//channels = (channels instanceof Array) ? channels : [];
-		dmeChannelsClip.createAttribute('channels', AT_ELEMENT_ARRAY, channels);
+		dmeChannelsClip.createAttribute('channels', DmAttributeType.ElementArray, channels);
 		/*
 													'DmeChannelsClip'
 													{
@@ -500,23 +500,23 @@ export class SfmSession {
 		const trackList = Array.from(tracks);
 
 		// Tracks
-		dmeTrackGroup.createAttribute('tracks', AT_ELEMENT_ARRAY, trackList);
-		dmeTrackGroup.createAttribute('visible', AT_BOOL, true);
-		dmeTrackGroup.createAttribute('mute', AT_BOOL, false);
-		dmeTrackGroup.createAttribute('displayScale', AT_FLOAT, 1);
-		dmeTrackGroup.createAttribute('minimized', AT_BOOL, false);
-		dmeTrackGroup.createAttribute('volume', AT_FLOAT, 1);
-		dmeTrackGroup.createAttribute('forcemultitrack', AT_BOOL, false);
+		dmeTrackGroup.createAttribute('tracks', DmAttributeType.ElementArray, trackList);
+		dmeTrackGroup.createAttribute('visible', DmAttributeType.Bool, true);
+		dmeTrackGroup.createAttribute('mute', DmAttributeType.Bool, false);
+		dmeTrackGroup.createAttribute('displayScale', DmAttributeType.Float, 1);
+		dmeTrackGroup.createAttribute('minimized', DmAttributeType.Bool, false);
+		dmeTrackGroup.createAttribute('volume', DmAttributeType.Float, 1);
+		dmeTrackGroup.createAttribute('forcemultitrack', DmAttributeType.Bool, false);
 
 		return dmeTrackGroup;
 	}
 
 	#createDmeTimeFrame(name?: string, startTime = 0, duration = 60, offset = 0, scale = 1) {
 		const dmeTimeFrame = DataModel.createElement(undefined, 'DmeTimeFrame');
-		dmeTimeFrame.createAttribute('start', AT_TIME, startTime);
-		dmeTimeFrame.createAttribute('duration', AT_TIME, duration);
-		dmeTimeFrame.createAttribute('offset', AT_TIME, offset);
-		dmeTimeFrame.createAttribute('scale', AT_FLOAT, scale);
+		dmeTimeFrame.createAttribute('start', DmAttributeType.Time, startTime);
+		dmeTimeFrame.createAttribute('duration', DmAttributeType.Time, duration);
+		dmeTimeFrame.createAttribute('offset', DmAttributeType.Time, offset);
+		dmeTimeFrame.createAttribute('scale', DmAttributeType.Float, scale);
 
 		/*
 				'name' 'string' 'unnamed'
@@ -531,10 +531,10 @@ export class SfmSession {
 	#createDmeTransformControl(name: string, valuePosition = vec3.create(), valueOrientation = quat.create(), positionChannel?: DmElement, orientationChannel?: DmElement) {
 		const dmeTransformControl = DataModel.createElement(undefined, 'DmeTransformControl', name);
 
-		dmeTransformControl.createAttribute('valuePosition', AT_VECTOR3, valuePosition);//TODO
-		dmeTransformControl.createAttribute('valueOrientation', AT_QUATERNION, valueOrientation);//TODO
-		dmeTransformControl.createAttribute('positionChannel', AT_ELEMENT, positionChannel);//TODO
-		dmeTransformControl.createAttribute('orientationChannel', AT_ELEMENT, orientationChannel);//TODO
+		dmeTransformControl.createAttribute('valuePosition', DmAttributeType.Vector3, valuePosition);//TODO
+		dmeTransformControl.createAttribute('valueOrientation', DmAttributeType.Quaternion, valueOrientation);//TODO
+		dmeTransformControl.createAttribute('positionChannel', DmAttributeType.Element, positionChannel);//TODO
+		dmeTransformControl.createAttribute('orientationChannel', DmAttributeType.Element, orientationChannel);//TODO
 
 		/*
 		'valuePosition' 'vector3' '0 0 0'
@@ -549,9 +549,9 @@ export class SfmSession {
 	#createDmeScaleControl(name: string, valueScale: number, scaleChannel: DmElement) {
 		const dmeTransformControl = DataModel.createElement(undefined, 'DmElement', name);
 
-		dmeTransformControl.createAttribute('value', AT_FLOAT, valueScale);//TODO
-		dmeTransformControl.createAttribute('channel', AT_ELEMENT, scaleChannel);//TODO
-		dmeTransformControl.createAttribute('defaultValue', AT_FLOAT, 0.1);//TODO
+		dmeTransformControl.createAttribute('value', DmAttributeType.Float, valueScale);//TODO
+		dmeTransformControl.createAttribute('channel', DmAttributeType.Element, scaleChannel);//TODO
+		dmeTransformControl.createAttribute('defaultValue', DmAttributeType.Float, 0.1);//TODO
 
 		return dmeTransformControl;
 	}
@@ -560,12 +560,12 @@ export class SfmSession {
 		const dmeAnimationSet = DataModel.createElement(undefined, 'DmeAnimationSet', name);
 
 		//controls = (controls instanceof Array) ? controls : [];
-		dmeAnimationSet.createAttribute('controls', AT_ELEMENT_ARRAY, controls);
-		dmeAnimationSet.createAttribute('presetGroups', AT_ELEMENT_ARRAY, null);
-		dmeAnimationSet.createAttribute('phonememap', AT_ELEMENT_ARRAY, null);
-		dmeAnimationSet.createAttribute('operators', AT_ELEMENT_ARRAY, null);
-		dmeAnimationSet.createAttribute('rootControlGroup', AT_ELEMENT, rootControlGroup);
-		//dmeAnimationSet.createAttribute('gameModel', AT_ELEMENT, gameModel);
+		dmeAnimationSet.createAttribute('controls', DmAttributeType.ElementArray, controls);
+		dmeAnimationSet.createAttribute('presetGroups', DmAttributeType.ElementArray, null);
+		dmeAnimationSet.createAttribute('phonememap', DmAttributeType.ElementArray, null);
+		dmeAnimationSet.createAttribute('operators', DmAttributeType.ElementArray, null);
+		dmeAnimationSet.createAttribute('rootControlGroup', DmAttributeType.Element, rootControlGroup);
+		//dmeAnimationSet.createAttribute('gameModel', DmAttributeType.Element, gameModel);
 
 		return dmeAnimationSet;
 	}
@@ -576,46 +576,46 @@ export class SfmSession {
 		//bones = (bones instanceof Array) ? bones : [];
 
 		const dmeGameModel = DataModel.createElement(undefined, 'DmeGameModel', name);
-		dmeGameModel.createAttribute('transform', AT_ELEMENT, transform);
-		dmeGameModel.createAttribute('shape', AT_ELEMENT, null);
-		dmeGameModel.createAttribute('visible', AT_BOOL, true);
+		dmeGameModel.createAttribute('transform', DmAttributeType.Element, transform);
+		dmeGameModel.createAttribute('shape', DmAttributeType.Element, null);
+		dmeGameModel.createAttribute('visible', DmAttributeType.Bool, true);
 
-		dmeGameModel.createAttribute('children', AT_ELEMENT_ARRAY, children);
-		dmeGameModel.createAttribute('flexWeights', AT_FLOAT_ARRAY, null);
-		dmeGameModel.createAttribute('modelName', AT_STRING, modelName);
-		dmeGameModel.createAttribute('skin', AT_INT, skin);
-		dmeGameModel.createAttribute('body', AT_INT, bodyGroups);
-		dmeGameModel.createAttribute('sequence', AT_INT, 0);
-		dmeGameModel.createAttribute('flags', AT_INT, 0);
-		dmeGameModel.createAttribute('bones', AT_ELEMENT_ARRAY, bones);
-		dmeGameModel.createAttribute('globalFlexControllers', AT_ELEMENT_ARRAY, null);
-		dmeGameModel.createAttribute('computeBounds', AT_BOOL, true);
-		dmeGameModel.createAttribute('evaluateProceduralBones', AT_BOOL, true);
-		dmeGameModel.createAttribute('flexnames', AT_STRING_ARRAY, null);
-		dmeGameModel.createAttribute('illumPositionDag', AT_ELEMENT, null);
-		dmeGameModel.createAttribute('localViewTargetFactor', AT_FLOAT, null);
-		dmeGameModel.createAttribute('eyes_convergence', AT_FLOAT, null);
+		dmeGameModel.createAttribute('children', DmAttributeType.ElementArray, children);
+		dmeGameModel.createAttribute('flexWeights', DmAttributeType.FloatArray, null);
+		dmeGameModel.createAttribute('modelName', DmAttributeType.String, modelName);
+		dmeGameModel.createAttribute('skin', DmAttributeType.Int, skin);
+		dmeGameModel.createAttribute('body', DmAttributeType.Int, bodyGroups);
+		dmeGameModel.createAttribute('sequence', DmAttributeType.Int, 0);
+		dmeGameModel.createAttribute('flags', DmAttributeType.Int, 0);
+		dmeGameModel.createAttribute('bones', DmAttributeType.ElementArray, bones);
+		dmeGameModel.createAttribute('globalFlexControllers', DmAttributeType.ElementArray, null);
+		dmeGameModel.createAttribute('computeBounds', DmAttributeType.Bool, true);
+		dmeGameModel.createAttribute('evaluateProceduralBones', DmAttributeType.Bool, true);
+		dmeGameModel.createAttribute('flexnames', DmAttributeType.StringArray, null);
+		dmeGameModel.createAttribute('illumPositionDag', DmAttributeType.Element, null);
+		dmeGameModel.createAttribute('localViewTargetFactor', DmAttributeType.Float, null);
+		dmeGameModel.createAttribute('eyes_convergence', DmAttributeType.Float, null);
 
 		return dmeGameModel;
 	}
 
 	createDmeGameParticleSystem(name: string, systemName: string, transform: DmElement) {
 		const dmeGameParticleSystem = DataModel.createElement(undefined, 'DmeGameParticleSystem', name);
-		dmeGameParticleSystem.createAttribute('transform', AT_ELEMENT, transform);
-		dmeGameParticleSystem.createAttribute('shape', AT_ELEMENT, null);
-		dmeGameParticleSystem.createAttribute('visible', AT_BOOL, true);
+		dmeGameParticleSystem.createAttribute('transform', DmAttributeType.Element, transform);
+		dmeGameParticleSystem.createAttribute('shape', DmAttributeType.Element, null);
+		dmeGameParticleSystem.createAttribute('visible', DmAttributeType.Bool, true);
 
-		dmeGameParticleSystem.createAttribute('children', AT_ELEMENT_ARRAY, []);
-		dmeGameParticleSystem.createAttribute('particleSystemType', AT_STRING, systemName);
-		dmeGameParticleSystem.createAttribute('particleSystemDefinition', AT_ELEMENT, null);
-		dmeGameParticleSystem.createAttribute('simulating', AT_BOOL, true);
-		dmeGameParticleSystem.createAttribute('emitting', AT_BOOL, true);
-		dmeGameParticleSystem.createAttribute('randomSeed', AT_INT, 1);
-		dmeGameParticleSystem.createAttribute('simulationTimeScale', AT_FLOAT, 1);
+		dmeGameParticleSystem.createAttribute('children', DmAttributeType.ElementArray, []);
+		dmeGameParticleSystem.createAttribute('particleSystemType', DmAttributeType.String, systemName);
+		dmeGameParticleSystem.createAttribute('particleSystemDefinition', DmAttributeType.Element, null);
+		dmeGameParticleSystem.createAttribute('simulating', DmAttributeType.Bool, true);
+		dmeGameParticleSystem.createAttribute('emitting', DmAttributeType.Bool, true);
+		dmeGameParticleSystem.createAttribute('randomSeed', DmAttributeType.Int, 1);
+		dmeGameParticleSystem.createAttribute('simulationTimeScale', DmAttributeType.Float, 1);
 
 
-		dmeGameParticleSystem.createAttribute('controlPoints', AT_ELEMENT_ARRAY, []);
-		dmeGameParticleSystem.createAttribute('controlModels', AT_ELEMENT_ARRAY, []);
+		dmeGameParticleSystem.createAttribute('controlPoints', DmAttributeType.ElementArray, []);
+		dmeGameParticleSystem.createAttribute('controlModels', DmAttributeType.ElementArray, []);
 		return dmeGameParticleSystem;
 	}
 
@@ -626,10 +626,10 @@ export class SfmSession {
 		const name = mtlName.replace(/\//g, '\\').toLowerCase().replace(/^(.*)\\/, '');
 
 		const dmeMaterial = DataModel.createElement(undefined, 'DmeMaterial', name);
-		dmeMaterial.createAttribute('mtlName', AT_STRING, mtlName);
-		//dmeMaterial.createAttribute('$cloakfactor', AT_FLOAT, 0);
-		//dmeMaterial.createAttribute('$cloakcolortint', AT_COLOR, vec4.fromValues(255, 255, 255, 255)/*'255 255 255 255'*/);
-		//dmeMaterial.createAttribute('$colortint_base', AT_COLOR, colorTintBase);
+		dmeMaterial.createAttribute('mtlName', DmAttributeType.String, mtlName);
+		//dmeMaterial.createAttribute('$cloakfactor', DmAttributeType.Float, 0);
+		//dmeMaterial.createAttribute('$cloakcolortint', DmAttributeType.Color, vec4.fromValues(255, 255, 255, 255)/*'255 255 255 255'*/);
+		//dmeMaterial.createAttribute('$colortint_base', DmAttributeType.Color, colorTintBase);
 
 		return dmeMaterial;
 	}
@@ -638,9 +638,9 @@ export class SfmSession {
 		if (gameModel) {
 			const materials = gameModel.findAttribute('materials');
 			if (materials) {
-				materials.setValue(materials.getValue().concat(material));//TODO
+				materials.setValue((materials.getValue() as DmElement[]).push(material));//TODO
 			} else {
-				gameModel.createAttribute('materials', AT_ELEMENT_ARRAY, [material]);
+				gameModel.createAttribute('materials', DmAttributeType.ElementArray, [material]);
 			}
 		}
 	}
@@ -649,15 +649,15 @@ export class SfmSession {
 		//children = (children instanceof Array) ? children : [];
 		//controls = (controls instanceof Array) ? controls : [];
 		const dmeControlGroup = DataModel.createElement(undefined, 'DmeControlGroup', name);
-		dmeControlGroup.createAttribute('children', AT_ELEMENT_ARRAY, children);
-		dmeControlGroup.createAttribute('controls', AT_ELEMENT_ARRAY, controls);
+		dmeControlGroup.createAttribute('children', DmAttributeType.ElementArray, children);
+		dmeControlGroup.createAttribute('controls', DmAttributeType.ElementArray, controls);
 
 
-		dmeControlGroup.createAttribute('groupColor', AT_COLOR, vec4.fromValues(0, 128, 255, 255)/*'0 128 255 255'*/);
-		dmeControlGroup.createAttribute('controlColor', AT_COLOR, vec4.fromValues(200, 200, 200, 255)/*'200 200 200 255'*/);
-		dmeControlGroup.createAttribute('visible', AT_BOOL, true);
-		dmeControlGroup.createAttribute('selectable', AT_BOOL, true);
-		dmeControlGroup.createAttribute('snappable', AT_BOOL, true);
+		dmeControlGroup.createAttribute('groupColor', DmAttributeType.Color, vec4.fromValues(0, 128, 255, 255)/*'0 128 255 255'*/);
+		dmeControlGroup.createAttribute('controlColor', DmAttributeType.Color, vec4.fromValues(200, 200, 200, 255)/*'200 200 200 255'*/);
+		dmeControlGroup.createAttribute('visible', DmAttributeType.Bool, true);
+		dmeControlGroup.createAttribute('selectable', DmAttributeType.Bool, true);
+		dmeControlGroup.createAttribute('snappable', DmAttributeType.Bool, true);
 
 		return dmeControlGroup;
 	}
@@ -674,7 +674,7 @@ export class SfmSession {
 		const gameModelRootControlGroup = this.#createDmeControlGroup();
 		const animSet = this.#createDmeAnimationSet(name, [], gameModelRootControlGroup);
 
-		animSet.createAttribute('gameModel', AT_ELEMENT, gameModel);
+		animSet.createAttribute('gameModel', DmAttributeType.Element, gameModel);
 		const channelsClip = this.#createDmeChannelsClip(name, this.#createDmeTimeFrame(), []);
 		const pyro1 = this.createDmeDag(name, this.#createDmeTransform(), [gameModel]);
 		pyro1.setAttributeValue('visible', dynamicProp.visible);
@@ -699,7 +699,7 @@ export class SfmSession {
 			const viewTargetTransform = this.#createBoneTransform(animSet, 'viewTarget', 'viewTarget', viewTargetPos/*[0, -600, -192]*/, quat.create(), channelsClip.findAttribute('channels'), animSetControls);
 			const viewTargetDag = this.createDmeDag('viewTarget', viewTargetTransform, []);
 			gameModel.findAttribute('children')?.pushValue(viewTargetDag);
-			gameModel.createAttribute('viewTargetDag', AT_ELEMENT, viewTargetDag);
+			gameModel.createAttribute('viewTargetDag', DmAttributeType.Element, viewTargetDag);
 		}
 
 		if (parentGameModel) {
@@ -708,7 +708,7 @@ export class SfmSession {
 		return gameModel;
 	}
 
-	#getGameModelControlGroup(gameModel: DmElement, controlName: string) {
+	#getGameModelControlGroup(gameModel: DmElement, controlName: string): DmElement | null {
 		const defaultControlGroupName = 'Unknown';
 		const defaultAnimationGroups = SfmSession.defaultAnimationGroups;
 
@@ -716,7 +716,10 @@ export class SfmSession {
 		const controlsGroupName = this.#getGameModelControlGroup2(defaultAnimationGroups?.groupFile as JSONObject, controlName) ?? defaultControlGroupName;
 		const controlsGroupArray = controlsGroupName.split('.');
 
-		const currentControlGroup = gameModel.findAttribute('rootControlGroup')?.getValue();
+		const currentControlGroup = gameModel.findAttribute('rootControlGroup')?.getValue() as DmElement;
+		if (!currentControlGroup) {
+			return null;
+		}
 		const controlGroup = this.#getControlGroup(currentControlGroup, controlsGroupArray);
 
 		return controlGroup;
@@ -728,15 +731,17 @@ export class SfmSession {
 			return this.#getControlGroup(dmeControlGroup, controlName.slice(1));
 		}
 
-		const childrenArray = dmeControlGroup.findAttribute('children')?.getValue();
-		for (let i = 0; i < childrenArray.length; ++i) {
-			const child = childrenArray[i];
-			if (child.findAttribute('name').getValue() == currentControlName) {
-				if (controlName.length == 1) {
-					// No more level
-					return child;
+		const childrenArray = dmeControlGroup.findAttribute('children')?.getValue() as DmElement[];
+		if (childrenArray) {
+			for (let i = 0; i < childrenArray.length; ++i) {
+				const child = childrenArray[i]!;
+				if (child.findAttribute('name')?.getValue() == currentControlName) {
+					if (controlName.length == 1) {
+						// No more level
+						return child;
+					}
+					return this.#getControlGroup(child, controlName.slice(1));
 				}
-				return this.#getControlGroup(child, controlName.slice(1));
 			}
 		}
 		const controlGroup = this.#createDmeControlGroup(currentControlName);
@@ -799,29 +804,29 @@ export class SfmSession {
 		const controlGroup = this.#createDmeControlGroup('all', undefined, animSetControlArray);
 		const rootControlGroup = this.#createDmeControlGroup(undefined, [controlGroup]);
 		const animSet = this.#createDmeAnimationSet(name, animSetControlArray, rootControlGroup/*, camera*/);
-		animSet.createAttribute('camera', AT_ELEMENT, camera);
+		animSet.createAttribute('camera', DmAttributeType.Element, camera);
 
 		const channelsClip = this.#createDmeChannelsClip(name, this.#createDmeTimeFrame(name, -5, 70), channelArray);
 
 		for (let i = 0; i < cameraChannels.length; ++i) {
-			const cameraChannel = cameraChannels[i];
+			const cameraChannel = cameraChannels[i]!;
 
 			const scaleOperator = this.createRescaleOperator(cameraChannel.name + '_rescale', cameraChannel.result, cameraChannel.lo, cameraChannel.hi);
 
 			const source = DataModel.createElement(undefined, 'DmElement', cameraChannel.name);
 
 			const channel = this.#createDmeChannel(cameraChannel.name, source, 'value', 0, scaleOperator, 'value', 0, 1);
-			source.createAttribute('channel', AT_ELEMENT, channel);
+			source.createAttribute('channel', DmAttributeType.Element, channel);
 
 			const value = (cameraChannel.result - cameraChannel.lo) / (cameraChannel.hi - cameraChannel.lo);
 			const defaultValue = cameraChannel.defaultValue;
-			source.createAttribute('value', AT_FLOAT, value);//TODO
-			source.createAttribute('defaultValue', AT_FLOAT, defaultValue);//TODO
+			source.createAttribute('value', DmAttributeType.Float, value);//TODO
+			source.createAttribute('defaultValue', DmAttributeType.Float, defaultValue);//TODO
 
 			const scaleChannel = this.#createDmeChannel('scaled_' + cameraChannel.name + '_channel', scaleOperator, 'result', 0, camera, cameraChannel.name, 0, 1);
 
-			const scaleChannelLog = this.#createDmeTypedLog(AT_FLOAT, 'float log', [], []);
-			scaleChannel.createAttribute('log', AT_ELEMENT, scaleChannelLog);
+			const scaleChannelLog = this.#createDmeTypedLog(DmAttributeType.Float, 'float log', [], []);
+			scaleChannel.createAttribute('log', DmAttributeType.Element, scaleChannelLog);
 
 			//animSet.findAttribute('controls').pushValue(source);
 			animSetControlArray.push(source);
@@ -833,19 +838,19 @@ export class SfmSession {
 
 		/****************/
 		const cameraTransformControl = this.#createDmeTransformControl('transform');
-		const systemTransform = camera.findAttribute('transform')?.value;
+		const systemTransform = camera.findAttribute('transform')?.value as DmElement;
 
 		const transformPosChannel = this.#createDmeChannel('transform_pos', cameraTransformControl, 'valuePosition', 0, systemTransform, 'position', 0, 3);
 		const transformRotChannel = this.#createDmeChannel('transform_rot', cameraTransformControl, 'valueOrientation', 0, systemTransform, 'orientation', 0, 3);
 
-		const transformPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [0], [systemTransform.findAttribute('position').value]);
-		transformPosChannel.createAttribute('log', AT_ELEMENT, transformPosChannelLog);
+		const transformPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [0], [systemTransform.findAttribute('position')!.value]);
+		transformPosChannel.createAttribute('log', DmAttributeType.Element, transformPosChannelLog);
 
-		const transformRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [0], [systemTransform.findAttribute('orientation').value]);
-		transformRotChannel.createAttribute('log', AT_ELEMENT, transformRotChannelLog);
+		const transformRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [0], [systemTransform.findAttribute('orientation')!.value]);
+		transformRotChannel.createAttribute('log', DmAttributeType.Element, transformRotChannelLog);
 
-		cameraTransformControl.createAttribute('positionChannel', AT_ELEMENT, transformPosChannel);
-		cameraTransformControl.createAttribute('orientationChannel', AT_ELEMENT, transformRotChannel);
+		cameraTransformControl.createAttribute('positionChannel', DmAttributeType.Element, transformPosChannel);
+		cameraTransformControl.createAttribute('orientationChannel', DmAttributeType.Element, transformRotChannel);
 
 		animSetControlArray.push(cameraTransformControl);
 		channelsClip.findAttribute('channels')?.pushValue(transformPosChannel);
@@ -859,9 +864,9 @@ export class SfmSession {
 
 	#createExpressionOperator(name: string, result: number, expr: string, spewresult: boolean) {
 		const dmeExpressionOperator = DataModel.createElement(undefined, 'DmeExpressionOperator', name);
-		dmeExpressionOperator.createAttribute('result', AT_FLOAT, result);
-		dmeExpressionOperator.createAttribute('expr', AT_STRING, expr);
-		dmeExpressionOperator.createAttribute('spewresult', AT_BOOL, spewresult);
+		dmeExpressionOperator.createAttribute('result', DmAttributeType.Float, result);
+		dmeExpressionOperator.createAttribute('expr', DmAttributeType.String, expr);
+		dmeExpressionOperator.createAttribute('spewresult', DmAttributeType.Bool, spewresult);
 
 		return dmeExpressionOperator;
 	}
@@ -872,9 +877,9 @@ export class SfmSession {
 
 		const value = (result - lo) / (hi - lo);
 
-		rescaleOperator.createAttribute('value', AT_FLOAT, value);
-		rescaleOperator.createAttribute('lo', AT_FLOAT, lo);
-		rescaleOperator.createAttribute('hi', AT_FLOAT, hi);
+		rescaleOperator.createAttribute('value', DmAttributeType.Float, value);
+		rescaleOperator.createAttribute('lo', DmAttributeType.Float, lo);
+		rescaleOperator.createAttribute('hi', DmAttributeType.Float, hi);
 
 		return rescaleOperator;
 	}
@@ -882,7 +887,7 @@ export class SfmSession {
 	#pushAnimSet(animSet: DmElement) {
 		const animationSets = this.filmShot1?.findAttribute('animationSets');
 		if (animationSets) {
-			animationSets.getValue().push(animSet);
+			(animationSets.getValue() as DmElement[])?.push(animSet);
 		} else {
 			console.error('Attribute animationSets not found');
 		}
@@ -892,7 +897,7 @@ export class SfmSession {
 	#pushChannelsClip(channelsClip: DmElement) {
 		const children = this.animSetEditorChannels?.findAttribute('children');
 		if (children) {
-			children.getValue().unshift(channelsClip);//TODO: push end
+			(children.getValue() as DmElement[])?.unshift(channelsClip);//TODO: push end
 		} else {
 			console.error('Attribute children not found');
 		}
@@ -901,7 +906,7 @@ export class SfmSession {
 	#pushDagToScene(dag: DmElement) {
 		const children = this.scene?.findAttribute('children');
 		if (children) {
-			children.getValue().push(dag);
+			(children.getValue() as DmElement[])?.push(dag);
 		} else {
 			console.error('Attribute children not found');
 		}
@@ -927,14 +932,14 @@ export class SfmSession {
 			const controlPointXPosChannel = this.#createDmeChannel('controlPoint' + i + '_pos', transformControlX, 'valuePosition', 0, transformX, 'position', 0, 3);
 			const controlPointXRotChannel = this.#createDmeChannel('controlPoint' + i + '_rot', transformControlX, 'valueOrientation', 0, transformX, 'orientation', 0, 3);
 
-			const controlPointXPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [], []);
-			controlPointXPosChannel.createAttribute('log', AT_ELEMENT, controlPointXPosChannelLog);
+			const controlPointXPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [], []);
+			controlPointXPosChannel.createAttribute('log', DmAttributeType.Element, controlPointXPosChannelLog);
 
-			const controlPointXRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [], []);
-			controlPointXRotChannel.createAttribute('log', AT_ELEMENT, controlPointXRotChannelLog);
+			const controlPointXRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [], []);
+			controlPointXRotChannel.createAttribute('log', DmAttributeType.Element, controlPointXRotChannelLog);
 
-			transformControlX.createAttribute('positionChannel', AT_ELEMENT, controlPointXPosChannel);
-			transformControlX.createAttribute('orientationChannel', AT_ELEMENT, controlPointXRotChannel);
+			transformControlX.createAttribute('positionChannel', DmAttributeType.Element, controlPointXPosChannel);
+			transformControlX.createAttribute('orientationChannel', DmAttributeType.Element, controlPointXRotChannel);
 			const dmeDagControlPointX = this.createDmeDag(cpName, transformX, undefined);
 
 			controlPointsArray.push(transformX);
@@ -944,7 +949,7 @@ export class SfmSession {
 
 			const controlPoint = controlPoints[i];
 			//if (i && controlPoint && controlPoint.currentPosition) {
-			//controlPointXPosChannelLog.createAttribute('defaultValue', AT_VECTOR3, controlPoint.currentPosition);
+			//controlPointXPosChannelLog.createAttribute('defaultValue', DmAttributeType.Vector3, controlPoint.currentPosition);
 			//controlPointXPosChannelLog.findAttribute('defaultvalue').setValue(controlPoint.currentPosition);
 			//controlPointXPosChannelLog.findAttribute('usedefaultvalue').setValue(true);
 			//}
@@ -952,9 +957,9 @@ export class SfmSession {
 				/*
 				var head = this.#findBone(parentGameModel, controlPoint.attachmentName);
 				if (head) {
-					dmeDagControlPointX.createAttribute('overrideParent', AT_ELEMENT, head);
-					dmeDagControlPointX.createAttribute('overridePos', AT_BOOL, true);
-					dmeDagControlPointX.createAttribute('overrideRot', AT_BOOL, true);
+					dmeDagControlPointX.createAttribute('overrideParent', DmAttributeType.Element, head);
+					dmeDagControlPointX.createAttribute('overridePos', DmAttributeType.Bool, true);
+					dmeDagControlPointX.createAttribute('overrideRot', DmAttributeType.Bool, true);
 				}
 				*/
 			}
@@ -977,23 +982,23 @@ export class SfmSession {
 		const transformPosChannel = this.#createDmeChannel('transform_pos', control1, 'valuePosition', 0, systemTransform, 'position', 0, 3);
 		const transformRotChannel = this.#createDmeChannel('transform_rot', control1, 'valueOrientation', 0, systemTransform, 'orientation', 0, 3);
 
-		const transformPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [], []);
-		transformPosChannel.createAttribute('log', AT_ELEMENT, transformPosChannelLog);
+		const transformPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [], []);
+		transformPosChannel.createAttribute('log', DmAttributeType.Element, transformPosChannelLog);
 
-		const transformRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [], []);
-		transformRotChannel.createAttribute('log', AT_ELEMENT, transformRotChannelLog);
+		const transformRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [], []);
+		transformRotChannel.createAttribute('log', DmAttributeType.Element, transformRotChannelLog);
 
-		control1.createAttribute('positionChannel', AT_ELEMENT, transformPosChannel);
-		control1.createAttribute('orientationChannel', AT_ELEMENT, transformRotChannel);
+		control1.createAttribute('positionChannel', DmAttributeType.Element, transformPosChannel);
+		control1.createAttribute('orientationChannel', DmAttributeType.Element, transformRotChannel);
 		/****************/
 
-		const emittingLog = this.#createDmeTypedLog(AT_BOOL, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
-		const visibleLog = this.#createDmeTypedLog(AT_BOOL, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
-		const similatingLog = this.#createDmeTypedLog(AT_BOOL, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
+		const emittingLog = this.#createDmeTypedLog(DmAttributeType.Bool, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
+		const visibleLog = this.#createDmeTypedLog(DmAttributeType.Bool, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
+		const similatingLog = this.#createDmeTypedLog(DmAttributeType.Bool, 'bool log', [0, 1.0, 65.0, 65.0001], [0, 1, 1, 0]);
 
-		emittingChannel.createAttribute('log', AT_ELEMENT, emittingLog);
-		visibleChannel.createAttribute('log', AT_ELEMENT, visibleLog);
-		simulatingChannel.createAttribute('log', AT_ELEMENT, similatingLog);
+		emittingChannel.createAttribute('log', DmAttributeType.Element, emittingLog);
+		visibleChannel.createAttribute('log', DmAttributeType.Element, visibleLog);
+		simulatingChannel.createAttribute('log', DmAttributeType.Element, similatingLog);
 
 
 		const channelsClip = this.#createDmeChannelsClip(name, this.#createDmeTimeFrame(name, -5, 70),
@@ -1007,13 +1012,15 @@ export class SfmSession {
 			head = parentGameModel;
 		}
 
-		gameModel.createAttribute('children', AT_ELEMENT_ARRAY, controlPointsDagArray/*[dmeDagControlPoint0, dmeDagControlPoint9]*/);
-		gameModel.createAttribute('controlPoints', AT_ELEMENT_ARRAY, controlPointsArray/*[transformControlPoint0, transformControlPoint9]*/);
+		gameModel.createAttribute('children', DmAttributeType.ElementArray, controlPointsDagArray/*[dmeDagControlPoint0, dmeDagControlPoint9]*/);
+		gameModel.createAttribute('controlPoints', DmAttributeType.ElementArray, controlPointsArray/*[transformControlPoint0, transformControlPoint9]*/);
 
 		const cp0 = controlPointsDagArray[0];
-		cp0.createAttribute('overrideParent', AT_ELEMENT, head);
-		cp0.createAttribute('overridePos', AT_BOOL, true);
-		cp0.createAttribute('overrideRot', AT_BOOL, true);
+		if (cp0) {
+			cp0.createAttribute('overrideParent', DmAttributeType.Element, head);
+			cp0.createAttribute('overridePos', DmAttributeType.Bool, true);
+			cp0.createAttribute('overrideRot', DmAttributeType.Bool, true);
+		}
 
 		const pyro1 = this.createDmeDag(name, this.#createDmeTransform(), [gameModel]);
 		/************/
@@ -1022,25 +1029,25 @@ export class SfmSession {
 		this.#pushChannelsClip(channelsClip);
 		this.#pushDagToScene(pyro1);
 
-		animSet.createAttribute('particle system', AT_ELEMENT, gameModel);
-		//animSet.createAttribute('particleFiles', AT_STRING_ARRAY, [fileName]);
+		animSet.createAttribute('particle system', DmAttributeType.Element, gameModel);
+		//animSet.createAttribute('particleFiles', DmAttributeType.StringArray, [fileName]);
 
 		return gameModel;
 	}
 
 	makeChild(gameModel: DmElement, parentGameModel: DmElement) {
-		gameModel.createAttribute('overrideParent', AT_ELEMENT, parentGameModel);
-		gameModel.createAttribute('overridePos', AT_BOOL, true);
-		gameModel.createAttribute('overrideRot', AT_BOOL, true);
+		gameModel.createAttribute('overrideParent', DmAttributeType.Element, parentGameModel);
+		gameModel.createAttribute('overridePos', DmAttributeType.Bool, true);
+		gameModel.createAttribute('overrideRot', DmAttributeType.Bool, true);
 
-		const childArray: DmElement[] = gameModel.findAttribute('children')?.getValue();
+		const childArray: DmElement[] = gameModel.findAttribute('children')?.getValue() as DmElement[];
 		for (let i = 0; i < childArray.length; i++) {
-			this.#linkBoneChild(childArray[i], parentGameModel);
+			this.#linkBoneChild(childArray[i]!, parentGameModel);
 		}
 	}
 
 	#getBoneName(element: DmElement) {
-		const elementName = element.findAttribute('name')?.getValue();
+		const elementName = element.findAttribute('name')?.getValue() as string;
 
 		const result = /^bone \d* \((.*)\)$/.exec(elementName);
 		if (result && result[1]) {
@@ -1056,21 +1063,21 @@ export class SfmSession {
 		const boneName = this.#getBoneName(bone);
 		const parentBone = this.#findBone(parentGameModel, boneName);
 		if (parentBone) {
-			bone.createAttribute('overrideParent', AT_ELEMENT, parentBone);
-			bone.createAttribute('overridePos', AT_BOOL, true);
-			bone.createAttribute('overrideRot', AT_BOOL, true);
+			bone.createAttribute('overrideParent', DmAttributeType.Element, parentBone);
+			bone.createAttribute('overridePos', DmAttributeType.Bool, true);
+			bone.createAttribute('overrideRot', DmAttributeType.Bool, true);
 
-			const transform = bone.findAttribute('transform')?.getValue();
-			vec3.zero(transform.findAttribute('position').getValue());
-			vec4.zero(transform.findAttribute('orientation').getValue());
+			const transform = bone.findAttribute('transform')?.getValue() as DmElement;
+			vec3.zero(transform.findAttribute('position')!.getValue() as vec3);
+			vec4.zero(transform.findAttribute('orientation')!.getValue() as vec3);
 		}
 
 		const children = bone.findAttribute('children');
 		if (children) {
-			const childArray = children.getValue();
+			const childArray = children.getValue() as DmElement[];
 			if (childArray) {
 				for (let i = 0; i < childArray.length; i++) {
-					const child = childArray[i];
+					const child = childArray[i]!;
 					this.#linkBoneChild(child, parentGameModel);
 
 				}
@@ -1081,7 +1088,7 @@ export class SfmSession {
 	#findBone(gameModel: DmElement, boneName: string): DmElement | null {
 		const children = gameModel.findAttribute('children');
 		if (children) {
-			const childArray: DmElement[] = children.getValue();
+			const childArray: DmElement[] = children.getValue() as DmElement[];
 			if (childArray) {
 				for (let i = 0; i < childArray.length; i++) {
 					const child = childArray[i];
@@ -1102,7 +1109,7 @@ export class SfmSession {
 		return null;
 	}
 
-	#createGameModelBones(gameModel: DmElement, animSet: DmElement, dynamicProp: Source1ModelInstance, parentGameModel: DmElement | undefined, channelsClip: DmElement, animSetControls?: DmAttribute) {
+	#createGameModelBones(gameModel: DmElement, animSet: DmElement, dynamicProp: Source1ModelInstance, parentGameModel: DmElement | undefined, channelsClip: DmElement, animSetControls?: DmAttribute | null):void {
 		const boneTmp = new Map<Bone, DmElement>();
 		//const boneTmp2 = new Map<string, number>();
 		const elementArray: DmElement[] = [];
@@ -1116,7 +1123,7 @@ export class SfmSession {
 		//console.error(dynamicProp.bonesScale);
 
 		let usedBoneIndex = 0;
-		if (boneArray) {
+		if(boneArray) {
 			for (let boneIndex = 0, boneArrayLength = boneArray.length; boneIndex < boneArrayLength; ++boneIndex) {
 				const bone = boneArray[boneIndex];
 				//if (bone && ((bone.flags & BONE_USED_MASK) > BONE_USED_BY_VERTEX_LOD0 * 0)) {
@@ -1126,14 +1133,14 @@ export class SfmSession {
 					const boneName2 = bone.name;
 					//boneTmp2.set(boneName2, boneIndex);
 
-					let bonePos, boneQuat;
+					let bonePos: vec4, boneQuat: quat;
 
 					if (bone.parent instanceof Skeleton) {
 						bonePos = bone.worldPos;
 						boneQuat = bone.worldQuat;
 					} else {
-						bonePos = bone.position;//vec3.sub(vec3.create(), bone.worldPos, bone.parent.worldPos)//bone.position;
-						boneQuat = bone.quaternion;
+						bonePos = bone.getPosition();//vec3.sub(vec3.create(), bone.worldPos, bone.parent.worldPos)//bone.position;
+						boneQuat = bone.getQuaternion();
 					}
 
 					const boneScale = bone.scale[0]//TODO: set 3D scale;
@@ -1152,7 +1159,7 @@ export class SfmSession {
 					} else {
 						const children = boneTmp.get(bone.parent as Bone)?.findAttribute('children');
 						if (children) {
-							children.getValue().push(boneDmeDag);
+							(children.getValue() as DmElement[])?.push(boneDmeDag);
 						}
 					}
 				}
@@ -1161,520 +1168,513 @@ export class SfmSession {
 
 		const boneArray2 = sourceModel.getAttachments();
 		const mdlBones = sourceModel.getBones();
-		if (boneArray2 && mdlBones) {
-			for (let boneIndex = 0, boneArrayLength = boneArray2.length; boneIndex < boneArrayLength; ++boneIndex) {
-				const bone = boneArray2[boneIndex];
-				if (bone/* && ((bone.flags & BONE_USED_MASK) > BONE_USED_BY_VERTEX_LOD0 * 0)*/) {
-					const boneName2 = /*'atta_' + */bone.name;
-					const boneName = 'bone ' + usedBoneIndex++ + ' (' + boneName2 + ')';
+		if(boneArray2 && mdlBones) {
+	for (let boneIndex = 0, boneArrayLength = boneArray2.length; boneIndex < boneArrayLength; ++boneIndex) {
+		const bone = boneArray2[boneIndex];
+		if (bone/* && ((bone.flags & BONE_USED_MASK) > BONE_USED_BY_VERTEX_LOD0 * 0)*/) {
+			const boneName2 = /*'atta_' + */bone.name;
+			const boneName = 'bone ' + usedBoneIndex++ + ' (' + boneName2 + ')';
 
 
-					let bonePos, boneQuat;
+			let bonePos, boneQuat;
 
-					/*if (-1 == bone.parentBone) {
-						bonePos = bone.worldPos;
-						boneQuat = bone.worldQuat;
-					} else {
-						bonePos = bone.position;
-						boneQuat = bone.boneQuat;
-					}*/
-					const m = mat3.create();
-					const local = bone.local;
-					m[0] = local[0];
-					m[1] = local[1];
-					m[2] = local[2];
-					m[3] = local[4];
-					m[4] = local[5];
-					m[5] = local[6];
-					m[6] = local[8];
-					m[7] = local[9];
-					m[8] = local[10];
+			/*if (-1 == bone.parentBone) {
+				bonePos = bone.worldPos;
+				boneQuat = bone.worldQuat;
+			} else {
+				bonePos = bone.position;
+				boneQuat = bone.boneQuat;
+			}*/
+			const m = mat3.create();
+			const local = bone.local;
+			m[0] = local[0];
+			m[1] = local[1];
+			m[2] = local[2];
+			m[3] = local[4];
+			m[4] = local[5];
+			m[5] = local[6];
+			m[6] = local[8];
+			m[7] = local[9];
+			m[8] = local[10];
 
-					bonePos = vec3.create();
-					boneQuat = quat.create();
+			bonePos = vec3.create();
+			boneQuat = quat.create();
 
-					bonePos = vec3.fromValues(local[3], local[7], local[11]);
-					boneQuat = quat.fromMat3(quat.create(), m);
+			bonePos = vec3.fromValues(local[3], local[7], local[11]);
+			boneQuat = quat.fromMat3(quat.create(), m);
 
-					const boneTransform = this.#createBoneTransform(animSet, boneName, boneName2, bonePos, boneQuat, channelsClip.findAttribute('channels'), animSetControls);
+			const boneTransform = this.#createBoneTransform(animSet, boneName, boneName2, bonePos, boneQuat, channelsClip.findAttribute('channels'), animSetControls);
 
-					const boneDmeDag = this.createDmeDag(boneName, boneTransform, []);
-					//boneTmp[boneIndex] = boneDmeDag;
-					if (!illumPositionDag) {
-						illumPositionDag = boneDmeDag;
-					}
-					const attachmentBone = mdlBones[bone.localbone];
-					const attachmentParentBone = dynamicProp.getBoneByName(attachmentBone?.name);
+			const boneDmeDag = this.createDmeDag(boneName, boneTransform, []);
+			//boneTmp[boneIndex] = boneDmeDag;
+			if (!illumPositionDag) {
+				illumPositionDag = boneDmeDag;
+			}
+			const attachmentBone = mdlBones[bone.localbone];
+			const attachmentParentBone = dynamicProp.getBoneByName(attachmentBone?.name ?? '');
 
-					//transformArray.push(boneTransform);
+			//transformArray.push(boneTransform);
 
-					/*if (-1 == bone.parentBone) {
-						elementArray.push(boneDmeDag);
-					} else {*/
-					//var children// = boneTmp[boneTmp2[bone.bone.name]].findAttribute('children');TODOv2
-					if (attachmentParentBone) {
-						const children = boneTmp.get(attachmentParentBone)?.findAttribute('children');
-						if (children) {
-							children.getValue().push(boneDmeDag);
-						}
-					}
-					//}
+			/*if (-1 == bone.parentBone) {
+				elementArray.push(boneDmeDag);
+			} else {*/
+			//var children// = boneTmp[boneTmp2[bone.bone.name]].findAttribute('children');TODOv2
+			if (attachmentParentBone) {
+				const children = boneTmp.get(attachmentParentBone)?.findAttribute('children');
+				if (children) {
+					(children.getValue() as DmElement[]).push(boneDmeDag);
 				}
 			}
+			//}
 		}
+	}
+}
 
+//return transformArray;
+const bones = gameModel.findAttribute('bones');
+if (bones) {
+	bones.setValue((bones.getValue() as DmElement[]).concat(transformArray));//TODO
+}
+const children = gameModel.findAttribute('children');
+if (children) {
+	children.setValue((children.getValue() as DmElement[]).concat(elementArray));//TODO
+}
 
-
-
-
-
-		//return transformArray;
-		var children = gameModel.findAttribute('bones');
-		if (children) {
-			children.setValue(children.getValue().concat(transformArray));//TODO
-		}
-		var children = gameModel.findAttribute('children');
-		if (children) {
-			children.setValue(children.getValue().concat(elementArray));//TODO
-		}
-
-		gameModel.createAttribute('illumPositionDag', AT_ELEMENT, illumPositionDag);
+gameModel.createAttribute('illumPositionDag', DmAttributeType.Element, illumPositionDag);
 	}
 
-	#createBoneTransform(gameModel: DmElement, boneName1: string, boneName2: string, bonePos: vec3 | undefined, boneQuat: quat, channelsClip?: DmAttribute, animSetControls?: DmAttribute, boneScale?: number) {//TODO
-		const boneTransform = this.#createDmeTransform(boneName1, bonePos, boneQuat, boneScale);
-		const boneTransformControl = this.#createDmeTransformControl(boneName2);
+#createBoneTransform(gameModel: DmElement, boneName1: string, boneName2: string, bonePos: vec3 | undefined, boneQuat: quat, channelsClip ?: DmAttribute | null, animSetControls ?: DmAttribute | null, boneScale ?: number): DmElement {//TODO
+	const boneTransform = this.#createDmeTransform(boneName1, bonePos, boneQuat, boneScale);
+	const boneTransformControl = this.#createDmeTransformControl(boneName2);
 
-		const bonePosChannel = this.#createDmeChannel(boneName2 + '_p', boneTransformControl, 'valuePosition', 0, boneTransform, 'position', 0, 3);
-		const boneRotChannel = this.#createDmeChannel(boneName2 + '_o', boneTransformControl, 'valueOrientation', 0, boneTransform, 'orientation', 0, 3);
-		if (boneScale !== undefined) {
-			const boneScaleChannel = this.#createDmeChannel(boneName2 + '_scale', boneTransformControl, 'value', 0, boneTransform, 'value', 0, 3);
-			boneTransformControl.createAttribute('scaleChannel', AT_ELEMENT, boneScaleChannel);
-			channelsClip?.getValue().push(boneScaleChannel);
-			const boneTransformControlScale = this.#createDmeScaleControl(boneName2 + '_scale', 1, boneScaleChannel);
+	const bonePosChannel = this.#createDmeChannel(boneName2 + '_p', boneTransformControl, 'valuePosition', 0, boneTransform, 'position', 0, 3);
+	const boneRotChannel = this.#createDmeChannel(boneName2 + '_o', boneTransformControl, 'valueOrientation', 0, boneTransform, 'orientation', 0, 3);
+	if (boneScale !== undefined) {
+		const boneScaleChannel = this.#createDmeChannel(boneName2 + '_scale', boneTransformControl, 'value', 0, boneTransform, 'value', 0, 3);
+		boneTransformControl.createAttribute('scaleChannel', DmAttributeType.Element, boneScaleChannel);
+		(channelsClip?.getValue() as DmElement[])?.push(boneScaleChannel);
+		const boneTransformControlScale = this.#createDmeScaleControl(boneName2 + '_scale', 1, boneScaleChannel);
 
-			const transformScaleChannelLog = this.#createDmeTypedLog(AT_FLOAT, 'float log', [0], [1]);
-			boneScaleChannel.createAttribute('log', AT_ELEMENT, transformScaleChannelLog);
+		const transformScaleChannelLog = this.#createDmeTypedLog(DmAttributeType.Float, 'float log', [0], [1]);
+		boneScaleChannel.createAttribute('log', DmAttributeType.Element, transformScaleChannelLog);
 
-			const cameraChannel = boneScaleChannel;
-			const minScale = 0;
-			const maxScale = 10;
-			const resultScale = boneScale;
+		//const cameraChannel = boneScaleChannel;
+		const minScale = 0;
+		const maxScale = 10;
+		const resultScale = boneScale;
 
-			const scaleOperator = this.createRescaleOperator(boneName2 + '_scale', resultScale, minScale, maxScale);
+		const scaleOperator = this.createRescaleOperator(boneName2 + '_scale', resultScale, minScale, maxScale);
 
-			const source = DataModel.createElement(undefined, 'DmElement', boneName2 + '_scale');
+		const source = DataModel.createElement(undefined, 'DmElement', boneName2 + '_scale');
 
-			const channel = this.#createDmeChannel(boneName2, source, 'value', 0, scaleOperator, 'value', 0, 1);
-			source.createAttribute('channel', AT_ELEMENT, channel);
+		const channel = this.#createDmeChannel(boneName2, source, 'value', 0, scaleOperator, 'value', 0, 1);
+		source.createAttribute('channel', DmAttributeType.Element, channel);
 
-			const value = (resultScale - minScale) / (maxScale - minScale);
-			const defaultValue = 0.1;
-			source.createAttribute('value', AT_FLOAT, value);//TODO
-			source.createAttribute('defaultValue', AT_FLOAT, defaultValue);//TODO
+		const value = (resultScale - minScale) / (maxScale - minScale);
+		const defaultValue = 0.1;
+		source.createAttribute('value', DmAttributeType.Float, value);//TODO
+		source.createAttribute('defaultValue', DmAttributeType.Float, defaultValue);//TODO
 
-			const scaleChannel = this.#createDmeChannel('scaled_' + boneName2 + '_scale_channel', scaleOperator, 'result', 0, boneTransform, 'scale', 0, 1);
+		const scaleChannel = this.#createDmeChannel('scaled_' + boneName2 + '_scale_channel', scaleOperator, 'result', 0, boneTransform, 'scale', 0, 1);
 
-			const scaleChannelLog = this.#createDmeTypedLog(AT_FLOAT, 'float log', [], []);
-			scaleChannel.createAttribute('log', AT_ELEMENT, scaleChannelLog);
+		const scaleChannelLog = this.#createDmeTypedLog(DmAttributeType.Float, 'float log', [], []);
+		scaleChannel.createAttribute('log', DmAttributeType.Element, scaleChannelLog);
 
-			//animSet.findAttribute('controls').pushValue(source);
-			//animSetControlArray.push(source);
-			animSetControls?.getValue().push(source);
-			gameModel.findAttribute('operators')?.pushValue(scaleOperator);
-			channelsClip?.getValue().push(channel);
-			channelsClip?.getValue().push(scaleChannel);
-
-			const controlGroup = this.#getGameModelControlGroup(gameModel, boneName2);//TODO
-
-			controlGroup.findAttribute('controls')?.pushValue(boneTransformControlScale);
-
-		}
-
-		boneTransformControl.createAttribute('positionChannel', AT_ELEMENT, bonePosChannel);
-		boneTransformControl.createAttribute('orientationChannel', AT_ELEMENT, boneRotChannel);
-
-		channelsClip?.getValue().push(bonePosChannel);
-		channelsClip?.getValue().push(boneRotChannel);
-
-		animSetControls?.getValue().push(boneTransformControl);
-
-
-		const transformPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [0], [bonePos]);
-		bonePosChannel.createAttribute('log', AT_ELEMENT, transformPosChannelLog);
-
-		const transformRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [0], [boneQuat]);
-		boneRotChannel.createAttribute('log', AT_ELEMENT, transformRotChannelLog);
+		//animSet.findAttribute('controls').pushValue(source);
+		//animSetControlArray.push(source);
+		(animSetControls?.getValue() as DmElement[])?.push(source);
+		gameModel.findAttribute('operators')?.pushValue(scaleOperator);
+		(channelsClip?.getValue() as DmElement[])?.push(channel);
+		(channelsClip?.getValue() as DmElement[])?.push(scaleChannel);
 
 		const controlGroup = this.#getGameModelControlGroup(gameModel, boneName2);//TODO
 
-		controlGroup?.findAttribute('controls')?.pushValue(boneTransformControl);
+		controlGroup?.findAttribute('controls')?.pushValue(boneTransformControlScale);
 
-		return boneTransform;
+	}
+
+	boneTransformControl.createAttribute('positionChannel', DmAttributeType.Element, bonePosChannel);
+	boneTransformControl.createAttribute('orientationChannel', DmAttributeType.Element, boneRotChannel);
+
+	(channelsClip?.getValue() as DmElement[])?.push(bonePosChannel);
+	(channelsClip?.getValue() as DmElement[])?.push(boneRotChannel);
+
+	(animSetControls?.getValue() as DmElement[])?.push(boneTransformControl);
+
+
+	const transformPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [0], [bonePos]);
+	bonePosChannel.createAttribute('log', DmAttributeType.Element, transformPosChannelLog);
+
+	const transformRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [0], [boneQuat]);
+	boneRotChannel.createAttribute('log', DmAttributeType.Element, transformRotChannelLog);
+
+	const controlGroup = this.#getGameModelControlGroup(gameModel, boneName2);//TODO
+
+	controlGroup?.findAttribute('controls')?.pushValue(boneTransformControl);
+
+	return boneTransform;
+}
+
+#createGameModelFlexes(gameModel: DmElement, animSet: DmElement, sourceModel: SourceModel, channelsClip: DmElement, pyroGameModelBodyControlGroup: DmAttribute | null): void {
+	//console.error(sourceModel);
+	const flexControllersArray = sourceModel.mdl.getFlexControllers() || [];
+	const flexControllersArrayLength = flexControllersArray.length;
+	for(let flexControllersIndex = 0; flexControllersIndex <flexControllersArrayLength; ++flexControllersIndex) {
+	const flexController = flexControllersArray[flexControllersIndex];
+	if (flexController) {
+		//console.error(flexController);
+		const flexName = flexController.name;
+		//const flexType = flexController.type;
+
+		//var flexWeight = flexType == 'eyes' ? 0.5 : 0.0;
+		const flexWeight = flexController.min < 0 ? 0.5 : 0.0;//TODO: get the stereo flag from controllerui
+		//var flexWeight = flexController.min < 0 ? 0.5 : SourceEngine.Models.GlobalFlexController.getControllerValue(flexName);//TODO: get the stereo flag from controllerui
+
+		const dmeGlobalFlexControllerOperator = this.createDmeGlobalFlexControllerOperator(flexName, flexWeight, gameModel);
+
+		const flexElement = DataModel.createElement(undefined, 'DmElement', flexName);
+		flexElement.createAttribute('defaultValue', DmAttributeType.Float, flexWeight);
+		flexElement.createAttribute('value', DmAttributeType.Float, flexWeight);
+		const flexChannel = this.#createDmeChannel(flexName + '_flex_channel', flexElement, 'value', 0, dmeGlobalFlexControllerOperator, 'flexWeight', 0, 3);
+		flexElement.createAttribute('channel', DmAttributeType.Element, flexChannel);
+
+
+		const flexChannelLog = this.#createDmeTypedLog(DmAttributeType.Float, 'float log');
+		flexChannel.createAttribute('log', DmAttributeType.Element, flexChannelLog);
+
+		gameModel.findAttribute('flexWeights')?.pushValue(flexWeight);
+		gameModel.findAttribute('flexnames')?.pushValue(flexName);
+		gameModel.findAttribute('globalFlexControllers')?.pushValue(dmeGlobalFlexControllerOperator);
+		channelsClip?.findAttribute('channels')?.pushValue(flexChannel);
+		(pyroGameModelBodyControlGroup?.getValue() as DmElement[] | undefined)?.push(flexElement);
+
+		const controlGroup = this.#getGameModelControlGroup(animSet, flexName);//TODO
+
+		controlGroup?.findAttribute('controls')?.pushValue(flexElement);
+
+	}
+}
+return;
 	}
 
 
+createDmeTextFXClip(name: string, text: string, textColor = vec4.fromValues(255, 255, 255, 255), fontName: string): DmElement {
+	//textColor = textColor || vec4.fromValues(255, 255, 255, 255);
 
-	#createGameModelFlexes(gameModel: DmElement, animSet: DmElement, sourceModel: SourceModel, channelsClip: DmElement, pyroGameModelBodyControlGroup?: DmAttribute) {
-		//console.error(sourceModel);
-		const flexControllersArray = sourceModel.mdl.getFlexControllers() || [];
-		const flexControllersArrayLength = flexControllersArray.length;
-		for (let flexControllersIndex = 0; flexControllersIndex < flexControllersArrayLength; ++flexControllersIndex) {
-			const flexController = flexControllersArray[flexControllersIndex];
-			if (flexController) {
-				//console.error(flexController);
-				const flexName = flexController.name;
-				const flexType = flexController.type;
+	const dmeTextFXClip = DataModel.createElement(undefined, 'DmeTextFXClip', name);
 
-				//var flexWeight = flexType == 'eyes' ? 0.5 : 0.0;
-				const flexWeight = flexController.min < 0 ? 0.5 : 0.0;//TODO: get the stereo flag from controllerui
-				//var flexWeight = flexController.min < 0 ? 0.5 : SourceEngine.Models.GlobalFlexController.getControllerValue(flexName);//TODO: get the stereo flag from controllerui
+	dmeTextFXClip.createAttribute('timeFrame', DmAttributeType.Element, this.#createDmeTimeFrame());
+	dmeTextFXClip.createAttribute('color', DmAttributeType.Color, vec4.fromValues(0, 0, 0, 0));
+	dmeTextFXClip.createAttribute('text', DmAttributeType.String, text);
+	dmeTextFXClip.createAttribute('mute', DmAttributeType.Bool, false);
+	dmeTextFXClip.createAttribute('trackGroups', DmAttributeType.ElementArray, null);
+	dmeTextFXClip.createAttribute('displayScale', DmAttributeType.Float, 1);
 
-				const dmeGlobalFlexControllerOperator = this.createDmeGlobalFlexControllerOperator(flexName, flexWeight, gameModel);
+	dmeTextFXClip.createAttribute('horizontalAlignment', DmAttributeType.Int, -1);
+	dmeTextFXClip.createAttribute('verticalAlignment', DmAttributeType.Int, 1);
+	dmeTextFXClip.createAttribute('xOffset', DmAttributeType.Int, 0);
+	dmeTextFXClip.createAttribute('yOffset', DmAttributeType.Int, 0);
+	dmeTextFXClip.createAttribute('xSpeed', DmAttributeType.Int, 0);
+	dmeTextFXClip.createAttribute('ySpeed', DmAttributeType.Int, 0);
+	dmeTextFXClip.createAttribute('textColor', DmAttributeType.Color, textColor);
+	dmeTextFXClip.createAttribute('font', DmAttributeType.String, fontName);
 
-				const flexElement = DataModel.createElement(undefined, 'DmElement', flexName);
-				flexElement.createAttribute('defaultValue', AT_FLOAT, flexWeight);
-				flexElement.createAttribute('value', AT_FLOAT, flexWeight);
-				const flexChannel = this.#createDmeChannel(flexName + '_flex_channel', flexElement, 'value', 0, dmeGlobalFlexControllerOperator, 'flexWeight', 0, 3);
-				flexElement.createAttribute('channel', AT_ELEMENT, flexChannel);
+	return dmeTextFXClip;
+};
 
+DmeMaterialOverlayFXClip(name: string, overlayColor = vec4.fromValues(255, 255, 255, 255), materialName: string): DmElement {
+	//overlayColor = overlayColor || vec4.fromValues(255, 255, 255, 255);
 
-				const flexChannelLog = this.#createDmeTypedLog(AT_FLOAT, 'float log');
-				flexChannel.createAttribute('log', AT_ELEMENT, flexChannelLog);
+	const dmeMaterialOverlayFXClip = DataModel.createElement(undefined, 'DmeMaterialOverlayFXClip', name);
 
-				gameModel.findAttribute('flexWeights')?.pushValue(flexWeight);
-				gameModel.findAttribute('flexnames')?.pushValue(flexName);
-				gameModel.findAttribute('globalFlexControllers')?.pushValue(dmeGlobalFlexControllerOperator);
-				channelsClip?.findAttribute('channels')?.pushValue(flexChannel);
-				pyroGameModelBodyControlGroup?.getValue().push(flexElement);
+	dmeMaterialOverlayFXClip.createAttribute('timeFrame', DmAttributeType.Element, this.#createDmeTimeFrame());
+	dmeMaterialOverlayFXClip.createAttribute('color', DmAttributeType.Color, vec4.fromValues(0, 0, 0, 0));
+	dmeMaterialOverlayFXClip.createAttribute('text', DmAttributeType.String, null);
+	dmeMaterialOverlayFXClip.createAttribute('mute', DmAttributeType.Bool, false);
+	dmeMaterialOverlayFXClip.createAttribute('trackGroups', DmAttributeType.ElementArray, null);
+	dmeMaterialOverlayFXClip.createAttribute('displayScale', DmAttributeType.Float, 1);
+	dmeMaterialOverlayFXClip.createAttribute('material', DmAttributeType.String, materialName);
+	dmeMaterialOverlayFXClip.createAttribute('overlaycolor', DmAttributeType.Color, overlayColor);
 
-				const controlGroup = this.#getGameModelControlGroup(animSet, flexName);//TODO
+	dmeMaterialOverlayFXClip.createAttribute('left', DmAttributeType.Int, 0);
+	dmeMaterialOverlayFXClip.createAttribute('top', DmAttributeType.Int, 0);
+	dmeMaterialOverlayFXClip.createAttribute('width', DmAttributeType.Int, 1);
+	dmeMaterialOverlayFXClip.createAttribute('height', DmAttributeType.Int, 1);
+	dmeMaterialOverlayFXClip.createAttribute('fullscreen', DmAttributeType.Bool, 1);
+	dmeMaterialOverlayFXClip.createAttribute('useSubRect', DmAttributeType.Bool, 0);
+	dmeMaterialOverlayFXClip.createAttribute('movementAngle', DmAttributeType.Float, 0);
+	dmeMaterialOverlayFXClip.createAttribute('movementSpeed', DmAttributeType.Float, 0);
+	dmeMaterialOverlayFXClip.createAttribute('subRectLeft', DmAttributeType.Int, 0);
+	dmeMaterialOverlayFXClip.createAttribute('subRectTop', DmAttributeType.Int, 0);
+	dmeMaterialOverlayFXClip.createAttribute('subRectWidth', DmAttributeType.Int, 0);
+	dmeMaterialOverlayFXClip.createAttribute('subRectHeight', DmAttributeType.Int, 0);
 
-				controlGroup.findAttribute('controls')?.pushValue(flexElement);
+	return dmeMaterialOverlayFXClip;
+};
 
-			}
-		}
-		return;
-	}
+addLight(lightName: string, cameraPos: vec3, cameraOrientation: quat/*lookAt*/): [DmElement | null, DmElement | null] {
+	this.#createDmeProjectedLight(lightName);
 
+	//const gameModelRootControlGroup = this.#createDmeControlGroup();
 
-	createDmeTextFXClip(name: string, text: string, textColor = vec4.fromValues(255, 255, 255, 255), fontName: string) {
-		//textColor = textColor || vec4.fromValues(255, 255, 255, 255);
+	const result = this.#createAnimSetFromTemplate('DmeProjectedLight', lightName);
+	const animSet = result[0];
+	const light = result[1];
+	animSet?.createAttribute('light', DmAttributeType.Element, light);
 
-		const dmeTextFXClip = DataModel.createElement(undefined, 'DmeTextFXClip', name);
+	//cameraOrientation = LookAt(cameraPos, lookAt, [0, 0, 1]);
+	const lightTransform = this.#createDmeTransform(undefined, cameraPos, cameraOrientation);
+	light?.findAttribute('transform')?.setValue(lightTransform);
 
-		dmeTextFXClip.createAttribute('timeFrame', AT_ELEMENT, this.#createDmeTimeFrame());
-		dmeTextFXClip.createAttribute('color', AT_COLOR, vec4.fromValues(0, 0, 0, 0));
-		dmeTextFXClip.createAttribute('text', AT_STRING, text);
-		dmeTextFXClip.createAttribute('mute', AT_BOOL, false);
-		dmeTextFXClip.createAttribute('trackGroups', AT_ELEMENT_ARRAY, null);
-		dmeTextFXClip.createAttribute('displayScale', AT_FLOAT, 1);
+	this.lightsDag = this.lightsDag ?? ((): DmElement => { const a = this.createDmeDag('Lights', this.#createDmeTransform(), []); this.#pushDagToScene(a); return a; })();
 
-		dmeTextFXClip.createAttribute('horizontalAlignment', AT_INT, -1);
-		dmeTextFXClip.createAttribute('verticalAlignment', AT_INT, 1);
-		dmeTextFXClip.createAttribute('xOffset', AT_INT, 0);
-		dmeTextFXClip.createAttribute('yOffset', AT_INT, 0);
-		dmeTextFXClip.createAttribute('xSpeed', AT_INT, 0);
-		dmeTextFXClip.createAttribute('ySpeed', AT_INT, 0);
-		dmeTextFXClip.createAttribute('textColor', AT_COLOR, textColor);
-		dmeTextFXClip.createAttribute('font', AT_STRING, fontName);
-
-		return dmeTextFXClip;
-	};
-
-	DmeMaterialOverlayFXClip(name: string, overlayColor = vec4.fromValues(255, 255, 255, 255), materialName: string) {
-		//overlayColor = overlayColor || vec4.fromValues(255, 255, 255, 255);
-
-		const dmeMaterialOverlayFXClip = DataModel.createElement(undefined, 'DmeMaterialOverlayFXClip', name);
-
-		dmeMaterialOverlayFXClip.createAttribute('timeFrame', AT_ELEMENT, this.#createDmeTimeFrame());
-		dmeMaterialOverlayFXClip.createAttribute('color', AT_COLOR, vec4.fromValues(0, 0, 0, 0));
-		dmeMaterialOverlayFXClip.createAttribute('text', AT_STRING, null);
-		dmeMaterialOverlayFXClip.createAttribute('mute', AT_BOOL, false);
-		dmeMaterialOverlayFXClip.createAttribute('trackGroups', AT_ELEMENT_ARRAY, null);
-		dmeMaterialOverlayFXClip.createAttribute('displayScale', AT_FLOAT, 1);
-		dmeMaterialOverlayFXClip.createAttribute('material', AT_STRING, materialName);
-		dmeMaterialOverlayFXClip.createAttribute('overlaycolor', AT_COLOR, overlayColor);
-
-		dmeMaterialOverlayFXClip.createAttribute('left', AT_INT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('top', AT_INT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('width', AT_INT, 1);
-		dmeMaterialOverlayFXClip.createAttribute('height', AT_INT, 1);
-		dmeMaterialOverlayFXClip.createAttribute('fullscreen', AT_BOOL, 1);
-		dmeMaterialOverlayFXClip.createAttribute('useSubRect', AT_BOOL, 0);
-		dmeMaterialOverlayFXClip.createAttribute('movementAngle', AT_FLOAT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('movementSpeed', AT_FLOAT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('subRectLeft', AT_INT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('subRectTop', AT_INT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('subRectWidth', AT_INT, 0);
-		dmeMaterialOverlayFXClip.createAttribute('subRectHeight', AT_INT, 0);
-
-		return dmeMaterialOverlayFXClip;
-	};
-
-	addLight(lightName: string, cameraPos: vec3, cameraOrientation: quat/*lookAt*/) {
-		this.#createDmeProjectedLight(lightName);
-
-		const gameModelRootControlGroup = this.#createDmeControlGroup();
-
-		const result = this.#createAnimSetFromTemplate('DmeProjectedLight', lightName);
-		const animSet = result[0];
-		const light = result[1];
-		animSet?.createAttribute('light', AT_ELEMENT, light);
-
-		//cameraOrientation = LookAt(cameraPos, lookAt, [0, 0, 1]);
-		const lightTransform = this.#createDmeTransform(undefined, cameraPos, cameraOrientation);
-		light?.findAttribute('transform')?.setValue(lightTransform);
-
-		this.lightsDag = this.lightsDag ?? function (e) { const a = e.createDmeDag('Lights', e.#createDmeTransform(), []); e.#pushDagToScene(a); return a; }(this);
-
-		this.lightsDag.findAttribute('children')?.pushValue(light);
+	this.lightsDag.findAttribute('children')?.pushValue(light);
 
 
-		return result;
-	}
+	return result;
+}
 
 
-	#createDmeProjectedLight(lightName: string/*, lightOptions*/) {
-		//lightOptions = lightOptions || {};
+#createDmeProjectedLight(lightName: string/*, lightOptions*/): DmElement | null {
+	//lightOptions = lightOptions || {};
 
 
-		return this.#createElementFromTemplate('DmeProjectedLight', lightName);
-		/*
+	return this.#createElementFromTemplate('DmeProjectedLight', lightName);
+	/*
 
 
 
-			var dmeProjectedLight = DataModel.createElementNew('DmeProjectedLight');
-			dmeGameModel.createAttribute('transform', AT_ELEMENT, transform);
-			dmeGameModel.createAttribute('shape', AT_ELEMENT, null);
-			dmeGameModel.createAttribute('visible', AT_BOOL, true);
+		var dmeProjectedLight = DataModel.createElementNew('DmeProjectedLight');
+		dmeGameModel.createAttribute('transform', DmAttributeType.Element, transform);
+		dmeGameModel.createAttribute('shape', DmAttributeType.Element, null);
+		dmeGameModel.createAttribute('visible', DmAttributeType.Bool, true);
 
-			dmeGameModel.createAttribute('children', AT_ELEMENT_ARRAY, lightOptions.children);
-			dmeGameModel.createAttribute('color', AT_ELEMENT_ARRAY, lightOptions.children);
+		dmeGameModel.createAttribute('children', DmAttributeType.ElementArray, lightOptions.children);
+		dmeGameModel.createAttribute('color', DmAttributeType.ElementArray, lightOptions.children);
 
 
 
 
 
-			dmeGameModel.createAttribute('flexWeights', AT_FLOAT_ARRAY, null);
-			dmeGameModel.createAttribute('modelName', AT_STRING, modelName);
-			dmeGameModel.createAttribute('skin', AT_INT, skin);
-			dmeGameModel.createAttribute('body', AT_INT, bodyGroups);
-			dmeGameModel.createAttribute('sequence', AT_INT, 0);
-			dmeGameModel.createAttribute('flags', AT_INT, 0);
-			dmeGameModel.createAttribute('bones', AT_ELEMENT_ARRAY, bones);
-			dmeGameModel.createAttribute('globalFlexControllers', AT_ELEMENT_ARRAY, null);
-			dmeGameModel.createAttribute('computeBounds', AT_BOOL, true);
-			dmeGameModel.createAttribute('evaluateProceduralBones', AT_BOOL, true);
-			dmeGameModel.createAttribute('flexnames', AT_STRING_ARRAY, null);
-			dmeGameModel.createAttribute('illumPositionDag', AT_ELEMENT, null);
-			dmeGameModel.createAttribute('localViewTargetFactor', AT_FLOAT, null);
-			dmeGameModel.createAttribute('eyes_convergence', AT_FLOAT, null);
+		dmeGameModel.createAttribute('flexWeights', DmAttributeType.FloatArray, null);
+		dmeGameModel.createAttribute('modelName', DmAttributeType.String, modelName);
+		dmeGameModel.createAttribute('skin', DmAttributeType.Int, skin);
+		dmeGameModel.createAttribute('body', DmAttributeType.Int, bodyGroups);
+		dmeGameModel.createAttribute('sequence', DmAttributeType.Int, 0);
+		dmeGameModel.createAttribute('flags', DmAttributeType.Int, 0);
+		dmeGameModel.createAttribute('bones', DmAttributeType.ElementArray, bones);
+		dmeGameModel.createAttribute('globalFlexControllers', DmAttributeType.ElementArray, null);
+		dmeGameModel.createAttribute('computeBounds', DmAttributeType.Bool, true);
+		dmeGameModel.createAttribute('evaluateProceduralBones', DmAttributeType.Bool, true);
+		dmeGameModel.createAttribute('flexnames', DmAttributeType.StringArray, null);
+		dmeGameModel.createAttribute('illumPositionDag', DmAttributeType.Element, null);
+		dmeGameModel.createAttribute('localViewTargetFactor', DmAttributeType.Float, null);
+		dmeGameModel.createAttribute('eyes_convergence', DmAttributeType.Float, null);
 
-			return dmeGameModel;
-		**/
-	}
+		return dmeGameModel;
+	**/
+}
 
-	#createAnimSetFromTemplate(elementType: string, elementName: string) {
-		const animSet = this.#createElementFromTemplate('DmeAnimationSet', elementName);
-		const element = this.#createElementFromTemplate(elementType, elementName);
+#createAnimSetFromTemplate(elementType: string, elementName: string): [DmElement | null, DmElement | null] {
+	const animSet = this.#createElementFromTemplate('DmeAnimationSet', elementName);
+	const element = this.#createElementFromTemplate(elementType, elementName);
 
-		const animSetControlArray = [];
-		const channelArray: DmElement[] = [];
+	const animSetControlArray = [];
+	const channelArray: DmElement[] = [];
 
-		const channelsClip = this.#createDmeChannelsClip(elementName, this.#createDmeTimeFrame(elementName, -5, 70), channelArray);
+	const channelsClip = this.#createDmeChannelsClip(elementName, this.#createDmeTimeFrame(elementName, -5, 70), channelArray);
 
-		const templates = elementTemplates[elementType];
-		const that = this;
-		if (templates) {
-			const templatesArray = Object.keys(templates);
-			for (let templateIndex = 0; templateIndex < templatesArray.length; ++templateIndex) {
-				//Object.keys(templates).forEach(function (key) {
-				const attribName = templatesArray[templateIndex];
-				const value = templates[attribName];
+	const templates = elementTemplates[elementType];
+	//const that = this;
+	if (templates) {
+		const templatesArray = Object.keys(templates);
+		for (const attribName of templatesArray) {
+			//Object.keys(templates).forEach(function (key) {
+			//const attribName = templatesArray[templateIndex]!;
+			const value = templates[attribName];
 
-				const attribType = value[0];
-				const attribValue = value[1];
-				const attribChannel = value[2];
+			const attribType = value[0];
+			//const attribValue = value[1];
+			const attribChannel = value[2];
 
-				if (attribChannel) {
-					const channelRescale = attribChannel.rescale;
+			if (attribChannel) {
+				const channelRescale = attribChannel.rescale;
 
-					if (attribName == 'transform') {
-						const cameraTransformControl = this.#createDmeTransformControl('transform');
-						const systemTransform = element?.findAttribute('transform')?.value;
+				if (attribName == 'transform') {
+					const cameraTransformControl = this.#createDmeTransformControl('transform');
+					const systemTransform = element?.findAttribute('transform')?.value as DmElement | undefined;
 
+					if (systemTransform) {
 						const transformPosChannel = this.#createDmeChannel('transform_pos', cameraTransformControl, 'valuePosition', 0, systemTransform, 'position', 0, 3);
 						const transformRotChannel = this.#createDmeChannel('transform_rot', cameraTransformControl, 'valueOrientation', 0, systemTransform, 'orientation', 0, 3);
 
-						const transformPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [0], [systemTransform.findAttribute('position').value]);
-						transformPosChannel.createAttribute('log', AT_ELEMENT, transformPosChannelLog);
+						const transformPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [0], [systemTransform?.findAttribute('position')?.value]);
+						transformPosChannel.createAttribute('log', DmAttributeType.Element, transformPosChannelLog);
 
-						const transformRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [0], [systemTransform.findAttribute('orientation').value]);
-						transformRotChannel.createAttribute('log', AT_ELEMENT, transformRotChannelLog);
+						const transformRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [0], [systemTransform?.findAttribute('orientation')?.value]);
+						transformRotChannel.createAttribute('log', DmAttributeType.Element, transformRotChannelLog);
 
-						cameraTransformControl.createAttribute('positionChannel', AT_ELEMENT, transformPosChannel);
-						cameraTransformControl.createAttribute('orientationChannel', AT_ELEMENT, transformRotChannel);
+						cameraTransformControl.createAttribute('positionChannel', DmAttributeType.Element, transformPosChannel);
+						cameraTransformControl.createAttribute('orientationChannel', DmAttributeType.Element, transformRotChannel);
 
 						animSetControlArray.push(cameraTransformControl);
 						channelsClip.findAttribute('channels')?.pushValue(transformPosChannel);
 						channelsClip.findAttribute('channels')?.pushValue(transformRotChannel);
+					}
+				} else {
+					const sourceDmeElement = this.#createElementFromTemplate('DmElement', attribName);//DataModel.createElement(undefined, 'DmElement', chanel.name);
 
+					let toElement = element;
+					let toAttribute = attribName;
+					if (channelRescale && toElement) {
+						const scaleOperator = this.createRescaleOperator(attribName, channelRescale.result, channelRescale.lo, channelRescale.hi);
+						const scaleChannel = this.#createDmeChannel('scaled_' + attribName + '_channel', scaleOperator, 'result', 0, toElement, attribName, 0, 1);
+						toElement = scaleOperator;
+						toAttribute = 'value';
+
+						animSet?.findAttribute('operators')?.pushValue(scaleOperator);
+						//channelsClip.findAttribute('channels').pushValue(channel);
+						channelsClip.findAttribute('channels')?.pushValue(scaleChannel);
 					} else {
-						const sourceDmeElement = this.#createElementFromTemplate('DmElement', attribName);//DataModel.createElement(undefined, 'DmElement', chanel.name);
-
-						let toElement = element;
-						let toAttribute = attribName;
-						if (channelRescale && toElement) {
-							const scaleOperator = this.createRescaleOperator(attribName, channelRescale.result, channelRescale.lo, channelRescale.hi);
-							const scaleChannel = this.#createDmeChannel('scaled_' + attribName + '_channel', scaleOperator, 'result', 0, toElement, attribName, 0, 1);
-							toElement = scaleOperator;
-							toAttribute = 'value';
-
-							animSet?.findAttribute('operators')?.pushValue(scaleOperator);
-							//channelsClip.findAttribute('channels').pushValue(channel);
-							channelsClip.findAttribute('channels')?.pushValue(scaleChannel);
-						} else {
-							console.error('aa');
-						}
-
-
-						if (sourceDmeElement && toElement) {
-							const dmeChannel = this.#createDmeChannel(attribType, sourceDmeElement, 'value', 0, toElement, toAttribute, 0, 1);
-							sourceDmeElement.createAttribute('channel', AT_ELEMENT, dmeChannel);
-							sourceDmeElement.createAttribute('value', AT_FLOAT, attribChannel.value);//TODO
-							sourceDmeElement.createAttribute('defaultValue', AT_FLOAT, attribChannel.value/*defaultValue*/);//TODO
-
-
-							animSetControlArray.push(sourceDmeElement);
-						}
-						//animSet.findAttribute('operators').pushValue(scaleOperator);
-						//channelsClip.findAttribute('channels')?.pushValue(dmeChannel);
-						//channelsClip.findAttribute('channels').pushValue(scaleChannel);
+						console.error('aa');
 					}
 
 
+					if (sourceDmeElement && toElement) {
+						const dmeChannel = this.#createDmeChannel(attribType, sourceDmeElement, 'value', 0, toElement, toAttribute, 0, 1);
+						sourceDmeElement.createAttribute('channel', DmAttributeType.Element, dmeChannel);
+						sourceDmeElement.createAttribute('value', DmAttributeType.Float, attribChannel.value);//TODO
+						sourceDmeElement.createAttribute('defaultValue', DmAttributeType.Float, attribChannel.value/*defaultValue*/);//TODO
 
 
-
+						animSetControlArray.push(sourceDmeElement);
+					}
+					//animSet.findAttribute('operators').pushValue(scaleOperator);
+					//channelsClip.findAttribute('channels')?.pushValue(dmeChannel);
+					//channelsClip.findAttribute('channels').pushValue(scaleChannel);
 				}
-				/*if (attribType == AT_ELEMENT) {
-					that.createElementFromTemplate(attribType, attribValue);
-				} else {
-					element.createAttribute(key, value[0], value[1]);
-				}*/
+
+
+
+
+
 			}
+			/*if (attribType == DmAttributeType.Element) {
+				that.createElementFromTemplate(attribType, attribValue);
+			} else {
+				element.createAttribute(key, value[0], value[1]);
+			}*/
 		}
-
-		const controlGroup = this.#createDmeControlGroup('all', undefined, animSetControlArray);
-		const rootControlGroup = this.#createDmeControlGroup(undefined, [controlGroup]);
-
-		animSet?.setAttributeValue('controls', animSetControlArray);
-		animSet?.setAttributeValue('rootControlGroup', rootControlGroup);
-		//animSet.createAttribute('camera', AT_ELEMENT, camera);
-
-		this.#pushChannelsClip(channelsClip);
-		if (animSet) {
-			this.#pushAnimSet(animSet);
-		}
-
-		return [animSet, element];
-		/*
-
-		var channelsClip = this.#createDmeChannelsClip(name, this.#createDmeTimeFrame(name, -5, 70), channelArray);
-
-		for (var i = 0; i < chanels.length; ++i) {
-			var chanel = chanels[i];
-
-			var scaleOperator = this.createRescaleOperator(chanel.name + '_rescale', chanel.result, chanel.lo, chanel.hi);
-
-
-			var sourceDmeElement = DataModel.createElement(undefined, 'DmElement', chanel.name);
-
-			var dmeChannel = this.#createDmeChannel(chanel.name, sourceDmeElement, 'value', 0, scaleOperator, 'value', 0, 1);
-			sourceDmeElement.createAttribute('channel', AT_ELEMENT, dmeChannel);
-
-			var value = (chanel.result - chanel.lo) / (chanel.hi - chanel.lo);
-			var defaultValue = chanel.defaultValue;
-			sourceDmeElement.createAttribute('value', AT_FLOAT, value);//TODO
-			sourceDmeElement.createAttribute('defaultValue', AT_FLOAT, defaultValue);//TODO
-
-			var scaleChannel = this.#createDmeChannel('scaled_' + chanel.name + '_channel', scaleOperator, 'result', 0, camera, chanel.name, 0, 1);
-
-			var scaleChannelLog = this.#createDmeTypedLog(AT_FLOAT, 'float log', [], []);
-			scaleChannel.createAttribute('log', AT_ELEMENT, scaleChannelLog);
-
-			//animSet.findAttribute('controls').pushValue(source);
-			animSetControlArray.push(sourceDmeElement);
-			animSet.findAttribute('operators').pushValue(scaleOperator);
-			channelsClip.findAttribute('channels').pushValue(dmeChannel);
-			channelsClip.findAttribute('channels').pushValue(scaleChannel);
-		}
-
-
-		/**************** /
-		var cameraTransformControl = this.#createDmeTransformControl('transform');
-		var systemTransform = camera.findAttribute('transform').value;
-
-		var transformPosChannel = this.#createDmeChannel('transform_pos', cameraTransformControl, 'valuePosition', 0, systemTransform, 'position', 0, 3);
-		var transformRotChannel = this.#createDmeChannel('transform_rot', cameraTransformControl, 'valueOrientation', 0, systemTransform, 'orientation', 0, 3);
-
-		var transformPosChannelLog = this.#createDmeTypedLog(AT_VECTOR3, 'vector3 log', [0], [systemTransform.findAttribute('position').value]);
-		transformPosChannel.createAttribute('log', AT_ELEMENT, transformPosChannelLog);
-
-		var transformRotChannelLog = this.#createDmeTypedLog(AT_QUATERNION, 'quaternion log', [0], [systemTransform.findAttribute('orientation').value]);
-		transformRotChannel.createAttribute('log', AT_ELEMENT, transformRotChannelLog);
-
-		cameraTransformControl.createAttribute('positionChannel', AT_ELEMENT, transformPosChannel);
-		cameraTransformControl.createAttribute('orientationChannel', AT_ELEMENT, transformRotChannel);
-
-		animSetControlArray.push(cameraTransformControl);
-		channelsClip.findAttribute('channels').pushValue(transformPosChannel);
-		channelsClip.findAttribute('channels').pushValue(transformRotChannel);
-		/**************** /
-
-		this.#pushChannelsClip(channelsClip);
-		return animSet;*/
 	}
 
-	#createElementFromTemplate(elementType: string, elementName: string) {
-		const templates = elementTemplates[elementType];
-		let element: DmElement | undefined;
+	const controlGroup = this.#createDmeControlGroup('all', undefined, animSetControlArray);
+	const rootControlGroup = this.#createDmeControlGroup(undefined, [controlGroup]);
 
-		if (templates) {
-			element = DataModel.createElementNew(elementType, elementName);
-			Object.keys(templates).forEach((key) => {
-				const value = templates[key];
+	animSet?.setAttributeValue('controls', animSetControlArray);
+	animSet?.setAttributeValue('rootControlGroup', rootControlGroup);
+	//animSet.createAttribute('camera', DmAttributeType.Element, camera);
 
-				const attribType = value[0];
-				const attribValue = value[1];
-				if (attribType == AT_ELEMENT) {
-					const childElement = this.#createElementFromTemplate(attribValue, elementName + '_' + key);
-					element!.createAttribute(key, attribType, childElement);
-				} else {
-					element!.createAttribute(key, attribType, attribValue);
-				}
-			});
-		}
+	this.#pushChannelsClip(channelsClip);
+	if (animSet) {
+		this.#pushAnimSet(animSet);
+	}
 
-		return element;
-	};
+	return [animSet, element];
+	/*
 
-	animSetSetControlValue(animSet: DmElement, controlName: string, value: number) {
-		const controlArray = animSet.findAttribute('controls')?.value;
-		for (let i = 0; i < controlArray.length; ++i) {
-			const control = controlArray[i];
-			const name = control.findAttribute('name').value;
-			if (controlName == name) {
-				//console.log(control);
-				control.setAttributeValue('value', value);
+	var channelsClip = this.#createDmeChannelsClip(name, this.#createDmeTimeFrame(name, -5, 70), channelArray);
+
+	for (var i = 0; i < chanels.length; ++i) {
+		var chanel = chanels[i];
+
+		var scaleOperator = this.createRescaleOperator(chanel.name + '_rescale', chanel.result, chanel.lo, chanel.hi);
+
+
+		var sourceDmeElement = DataModel.createElement(undefined, 'DmElement', chanel.name);
+
+		var dmeChannel = this.#createDmeChannel(chanel.name, sourceDmeElement, 'value', 0, scaleOperator, 'value', 0, 1);
+		sourceDmeElement.createAttribute('channel', DmAttributeType.Element, dmeChannel);
+
+		var value = (chanel.result - chanel.lo) / (chanel.hi - chanel.lo);
+		var defaultValue = chanel.defaultValue;
+		sourceDmeElement.createAttribute('value', DmAttributeType.Float, value);//TODO
+		sourceDmeElement.createAttribute('defaultValue', DmAttributeType.Float, defaultValue);//TODO
+
+		var scaleChannel = this.#createDmeChannel('scaled_' + chanel.name + '_channel', scaleOperator, 'result', 0, camera, chanel.name, 0, 1);
+
+		var scaleChannelLog = this.#createDmeTypedLog(DmAttributeType.Float, 'float log', [], []);
+		scaleChannel.createAttribute('log', DmAttributeType.Element, scaleChannelLog);
+
+		//animSet.findAttribute('controls').pushValue(source);
+		animSetControlArray.push(sourceDmeElement);
+		animSet.findAttribute('operators').pushValue(scaleOperator);
+		channelsClip.findAttribute('channels').pushValue(dmeChannel);
+		channelsClip.findAttribute('channels').pushValue(scaleChannel);
+	}
+
+
+	/**************** /
+	var cameraTransformControl = this.#createDmeTransformControl('transform');
+	var systemTransform = camera.findAttribute('transform').value;
+
+	var transformPosChannel = this.#createDmeChannel('transform_pos', cameraTransformControl, 'valuePosition', 0, systemTransform, 'position', 0, 3);
+	var transformRotChannel = this.#createDmeChannel('transform_rot', cameraTransformControl, 'valueOrientation', 0, systemTransform, 'orientation', 0, 3);
+
+	var transformPosChannelLog = this.#createDmeTypedLog(DmAttributeType.Vector3, 'vector3 log', [0], [systemTransform.findAttribute('position').value]);
+	transformPosChannel.createAttribute('log', DmAttributeType.Element, transformPosChannelLog);
+
+	var transformRotChannelLog = this.#createDmeTypedLog(DmAttributeType.Quaternion, 'quaternion log', [0], [systemTransform.findAttribute('orientation').value]);
+	transformRotChannel.createAttribute('log', DmAttributeType.Element, transformRotChannelLog);
+
+	cameraTransformControl.createAttribute('positionChannel', DmAttributeType.Element, transformPosChannel);
+	cameraTransformControl.createAttribute('orientationChannel', DmAttributeType.Element, transformRotChannel);
+
+	animSetControlArray.push(cameraTransformControl);
+	channelsClip.findAttribute('channels').pushValue(transformPosChannel);
+	channelsClip.findAttribute('channels').pushValue(transformRotChannel);
+	/**************** /
+
+	this.#pushChannelsClip(channelsClip);
+	return animSet;*/
+}
+
+#createElementFromTemplate(elementType: string, elementName: string): DmElement | null {
+	const templates = elementTemplates[elementType];
+	let element: DmElement | null = null;
+
+	if (templates) {
+		element = DataModel.createElementNew(elementType, elementName);
+		Object.keys(templates).forEach((key) => {
+			const value = templates[key];
+
+			const attribType = value[0];
+			const attribValue = value[1];
+			if (attribType == DmAttributeType.Element) {
+				const childElement = this.#createElementFromTemplate(attribValue, elementName + '_' + key);
+				element!.createAttribute(key, attribType, childElement);
+			} else {
+				element!.createAttribute(key, attribType, attribValue);
 			}
+		});
+	}
+
+	return element;
+};
+
+animSetSetControlValue(animSet: DmElement, controlName: string, value: number): void {
+	const controlArray = animSet.findAttribute('controls')?.value as DmElement[];
+	for(const control of controlArray) {
+		const name = control.findAttribute('name')?.value;
+		if (controlName == name) {
+			//console.log(control);
+			control.setAttributeValue('value', value);
 		}
-	};
+	}
+};
 
 }
 
-var cameraChannels = [
+const cameraChannels = [
 	{ name: 'fieldOfView', result: 30, lo: 10, hi: 120, defaultValue: 0.1818181872 },
 	{ name: 'focalDistance', result: 72, lo: 1, hi: 200, defaultValue: 0.3567839265 },
 	{ name: 'aperture', result: 0.2, lo: 0, hi: 10, defaultValue: 0.0199999996 },
@@ -1740,69 +1740,69 @@ var cameraChannels = [
 
 
 elementTemplates['DmeProjectedLight'] = {
-	'transform': [AT_ELEMENT, 'DmeTransform', {}],
-	'shape': [AT_ELEMENT, null],
-	'visible': [AT_BOOL, true],
-	'children': [AT_ELEMENT_ARRAY, null],
-	'color': [AT_COLOR, vec4.fromValues(255, 255, 255, 255)],
-	'intensity': [AT_FLOAT, 500.0, { value: 0.5, rescale: { lo: 0, hi: 1000, result: 500 } }],
-	'constantAttenuation': [AT_FLOAT, 0.0, { value: 0.0, rescale: { lo: 0, hi: 1, result: 0 } }],
-	'linearAttenuation': [AT_FLOAT, 0.0, { value: 0.0, rescale: { lo: 0, hi: 1000, result: 0 } }],
-	'quadraticAttenuation': [AT_FLOAT, 1500.0, { value: 0.5, rescale: { lo: 0, hi: 3000, result: 1500 } }],
-	'maxDistance': [AT_FLOAT, 600.0, { value: 0.1836734712, rescale: { lo: 60, hi: 3000, result: 600 } }],
-	'minDistance': [AT_FLOAT, 10.0, { value: 0.0301003344, rescale: { lo: 1, hi: 300, result: 10 } }],
-	'horizontalFOV': [AT_FLOAT, 30.0, { value: 0.1818181872, rescale: { lo: 10, hi: 120, result: 30 } }],
-	'verticalFOV': [AT_FLOAT, 30.0, { value: 0.1818181872, rescale: { lo: 10, hi: 120, result: 30 } }],
-	'ambientIntensity': [AT_FLOAT, 0.25, { value: 0.25 }],
-	'texture': [AT_STRING, 'effects//gobo_radial'],
-	'radius': [AT_FLOAT, 0.0, { value: 0.0, rescale: { lo: 0, hi: 50, result: 0 } }],
-	'castsShadows': [AT_BOOL, true],
-	'shadowDepthBias': [AT_FLOAT, 0.08, { value: 0.08, rescale: { lo: 0, hi: 0.001, result: 0.00008 } }],
-	'shadowSlopeScaleDepthBias': [AT_FLOAT, 0.2, { value: 0.2, rescale: { lo: 0, hi: 10, result: 2 } }],
-	'shadowFilterSize': [AT_FLOAT, 0.125, { value: 0.125, rescale: { lo: 0, hi: 24, result: 3 } }],
-	'shadowAtten': [AT_FLOAT, 1.0, { value: 1.0 }],
-	'drawShadowFrustum': [AT_BOOL, false],
-	'jitterSeed': [AT_FLOAT, 0.6114993691],
-	'animationTime': [AT_TIME, 0.0],
-	'frameRate': [AT_FLOAT, 24.0],
-	'farZAtten': [AT_FLOAT, 0.25, { value: 0.25, rescale: { lo: 0, hi: 3000, result: 750 } }],
-	'ambientOcclusion': [AT_FLOAT, 1.0],
-	'uberlight': [AT_BOOL, false],
-	'nearEdge': [AT_FLOAT, 0.4, { value: 0.4, rescale: { lo: 0, hi: 5, result: 2 } }],
-	'farEdge': [AT_FLOAT, 0.5, { value: 0.5, rescale: { lo: 0, hi: 200, result: 100 } }],
-	'cutOn': [AT_FLOAT, 0.05, { value: 0.05, rescale: { lo: 0, hi: 200, result: 10 } }],
-	'cutOff': [AT_FLOAT, 0.5416667, { value: 0.5416667, rescale: { lo: 0, hi: 1200, result: 650 } }],
-	'width': [AT_FLOAT, 0.03, { value: 0.03, rescale: { lo: 0, hi: 10, result: 0.3 } }],
-	'edgeWidth': [AT_FLOAT, 0.005, { value: 0.005, rescale: { lo: 0, hi: 10, result: 0.05 } }],
-	'height': [AT_FLOAT, 0.03, { value: 0.03, rescale: { lo: 0, hi: 10, result: 0.3 } }],
-	'edgeHeight': [AT_FLOAT, 0.005, { value: 0.005, rescale: { lo: 0, hi: 10, result: 0.05 } }],
-	'roundness': [AT_FLOAT, 0.8],
-	'volumetric': [AT_BOOL, false],
-	'volumetricIntensity': [AT_FLOAT, 0.1, { value: 0.1, rescale: { lo: 0, hi: 10, result: 1 } }],
-	'noiseStrength': [AT_FLOAT, 0.8],
-	'flashlightTime': [AT_FLOAT, 0.0],
-	'numPlanes': [AT_INT, 64],
-	'planeOffset': [AT_FLOAT, 0.8823529482],
-	'positionJitter': [AT_VECTOR2, vec2.fromValues(0.5744000077, -0.7741000056)],
+	'transform': [DmAttributeType.Element, 'DmeTransform', {}],
+	'shape': [DmAttributeType.Element, null],
+	'visible': [DmAttributeType.Bool, true],
+	'children': [DmAttributeType.ElementArray, null],
+	'color': [DmAttributeType.Color, vec4.fromValues(255, 255, 255, 255)],
+	'intensity': [DmAttributeType.Float, 500.0, { value: 0.5, rescale: { lo: 0, hi: 1000, result: 500 } }],
+	'constantAttenuation': [DmAttributeType.Float, 0.0, { value: 0.0, rescale: { lo: 0, hi: 1, result: 0 } }],
+	'linearAttenuation': [DmAttributeType.Float, 0.0, { value: 0.0, rescale: { lo: 0, hi: 1000, result: 0 } }],
+	'quadraticAttenuation': [DmAttributeType.Float, 1500.0, { value: 0.5, rescale: { lo: 0, hi: 3000, result: 1500 } }],
+	'maxDistance': [DmAttributeType.Float, 600.0, { value: 0.1836734712, rescale: { lo: 60, hi: 3000, result: 600 } }],
+	'minDistance': [DmAttributeType.Float, 10.0, { value: 0.0301003344, rescale: { lo: 1, hi: 300, result: 10 } }],
+	'horizontalFOV': [DmAttributeType.Float, 30.0, { value: 0.1818181872, rescale: { lo: 10, hi: 120, result: 30 } }],
+	'verticalFOV': [DmAttributeType.Float, 30.0, { value: 0.1818181872, rescale: { lo: 10, hi: 120, result: 30 } }],
+	'ambientIntensity': [DmAttributeType.Float, 0.25, { value: 0.25 }],
+	'texture': [DmAttributeType.String, 'effects//gobo_radial'],
+	'radius': [DmAttributeType.Float, 0.0, { value: 0.0, rescale: { lo: 0, hi: 50, result: 0 } }],
+	'castsShadows': [DmAttributeType.Bool, true],
+	'shadowDepthBias': [DmAttributeType.Float, 0.08, { value: 0.08, rescale: { lo: 0, hi: 0.001, result: 0.00008 } }],
+	'shadowSlopeScaleDepthBias': [DmAttributeType.Float, 0.2, { value: 0.2, rescale: { lo: 0, hi: 10, result: 2 } }],
+	'shadowFilterSize': [DmAttributeType.Float, 0.125, { value: 0.125, rescale: { lo: 0, hi: 24, result: 3 } }],
+	'shadowAtten': [DmAttributeType.Float, 1.0, { value: 1.0 }],
+	'drawShadowFrustum': [DmAttributeType.Bool, false],
+	'jitterSeed': [DmAttributeType.Float, 0.6114993691],
+	'animationTime': [DmAttributeType.Time, 0.0],
+	'frameRate': [DmAttributeType.Float, 24.0],
+	'farZAtten': [DmAttributeType.Float, 0.25, { value: 0.25, rescale: { lo: 0, hi: 3000, result: 750 } }],
+	'ambientOcclusion': [DmAttributeType.Float, 1.0],
+	'uberlight': [DmAttributeType.Bool, false],
+	'nearEdge': [DmAttributeType.Float, 0.4, { value: 0.4, rescale: { lo: 0, hi: 5, result: 2 } }],
+	'farEdge': [DmAttributeType.Float, 0.5, { value: 0.5, rescale: { lo: 0, hi: 200, result: 100 } }],
+	'cutOn': [DmAttributeType.Float, 0.05, { value: 0.05, rescale: { lo: 0, hi: 200, result: 10 } }],
+	'cutOff': [DmAttributeType.Float, 0.5416667, { value: 0.5416667, rescale: { lo: 0, hi: 1200, result: 650 } }],
+	'width': [DmAttributeType.Float, 0.03, { value: 0.03, rescale: { lo: 0, hi: 10, result: 0.3 } }],
+	'edgeWidth': [DmAttributeType.Float, 0.005, { value: 0.005, rescale: { lo: 0, hi: 10, result: 0.05 } }],
+	'height': [DmAttributeType.Float, 0.03, { value: 0.03, rescale: { lo: 0, hi: 10, result: 0.3 } }],
+	'edgeHeight': [DmAttributeType.Float, 0.005, { value: 0.005, rescale: { lo: 0, hi: 10, result: 0.05 } }],
+	'roundness': [DmAttributeType.Float, 0.8],
+	'volumetric': [DmAttributeType.Bool, false],
+	'volumetricIntensity': [DmAttributeType.Float, 0.1, { value: 0.1, rescale: { lo: 0, hi: 10, result: 1 } }],
+	'noiseStrength': [DmAttributeType.Float, 0.8],
+	'flashlightTime': [DmAttributeType.Float, 0.0],
+	'numPlanes': [DmAttributeType.Int, 64],
+	'planeOffset': [DmAttributeType.Float, 0.8823529482],
+	'positionJitter': [DmAttributeType.Vector2, vec2.fromValues(0.5744000077, -0.7741000056)],
 
 	/*
-	'noiseStrength':[AT_FLOAT, 0.8],
-	'flashlightTime':[AT_FLOAT, 0.0],
-	'numPlanes':[AT_INT, 64],
-	'planeOffset':[AT_FLOAT, 0.8823529482],
-	'positionJitter':[AT_VECTOR2, vec2.fromValues(0.5744000077, -0.7741000056)],*/
+	'noiseStrength':[DmAttributeType.Float, 0.8],
+	'flashlightTime':[DmAttributeType.Float, 0.0],
+	'numPlanes':[DmAttributeType.Int, 64],
+	'planeOffset':[DmAttributeType.Float, 0.8823529482],
+	'positionJitter':[DmAttributeType.Vector2, vec2.fromValues(0.5744000077, -0.7741000056)],*/
 }
 elementTemplates['DmeAnimationSet'] = {
-	'controls': [AT_ELEMENT_ARRAY, null],
-	'presetGroups': [AT_ELEMENT_ARRAY, null],
-	'phonememap': [AT_ELEMENT_ARRAY, null],
-	'operators': [AT_ELEMENT_ARRAY, null],
-	'rootControlGroup': [AT_ELEMENT, 'DmeControlGroup'],
+	'controls': [DmAttributeType.ElementArray, null],
+	'presetGroups': [DmAttributeType.ElementArray, null],
+	'phonememap': [DmAttributeType.ElementArray, null],
+	'operators': [DmAttributeType.ElementArray, null],
+	'rootControlGroup': [DmAttributeType.Element, 'DmeControlGroup'],
 }
 
 elementTemplates['DmeTransform'] = {
-	'position': [AT_VECTOR3, vec3.create()],
-	'orientation': [AT_QUATERNION, quat.create()],
+	'position': [DmAttributeType.Vector3, vec3.create()],
+	'orientation': [DmAttributeType.Quaternion, quat.create()],
 }
 
 elementTemplates['DmElement'] = {

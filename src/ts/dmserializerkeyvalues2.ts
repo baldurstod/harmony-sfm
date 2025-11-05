@@ -1,8 +1,7 @@
 import { FATTRIB_DONTSAVE } from './attributeflags';
 import { DataModel } from './datamodel';
 import { DmAttribute } from './dmattribute';
-import { AT_ELEMENT, AT_STRING } from './dmattributetypes';
-import { AT_FIRST_ARRAY_TYPE, AT_ELEMENT_ARRAY, AT_STRING_ARRAY } from './dmattributetypes';
+import { DmAttributeType, DmAttributeTypeFirstArray } from './dmattributetypes';
 import { DmElement } from './dmelement';
 import { DmElementSerializationDictionary, ELEMENT_DICT_HANDLE_INVALID } from './dmelementserializationdictionary';
 import { UtlBuffer } from './utlbuffer';
@@ -89,8 +88,8 @@ export class DmSerializerKeyValues2 {
 		buf.pushTab();
 
 		// explicitly serialize id, now that it's no longer an attribute
-		//buf.Printf('\"id\" \"%s\" ', DataModel.GetAttributeNameForType(AT_OBJECTID));
-		//buf.putString('\"id\" \"' + DataModel.GetAttributeNameForType(AT_OBJECTID) + '\" ');
+		//buf.Printf('\"id\" \"%s\" ', DataModel.GetAttributeNameForType(DmAttributeType.ObjectId));
+		//buf.putString('\"id\" \"' + DataModel.GetAttributeNameForType(DmAttributeType.ObjectId) + '\" ');
 		buf.putString('\"id\" \"elementid\" ');
 		buf.putChar('\"');
 		Serialize(buf, pElement.getId());
@@ -118,11 +117,11 @@ export class DmSerializerKeyValues2 {
 
 		// Now write them all out in reverse order, since FirstAttribute is actually the *last* attribute for perf reasons
 		for (let i = attributes.length - 1; i >= 0; --i) {
-			const pAttribute = attributes[i];
+			const pAttribute = attributes[i]!;
 
-			const pName = pAttribute.getName();
-			const nAttrType = pAttribute.getType();
-			if (nAttrType != AT_ELEMENT) {
+			const pName = pAttribute.name;
+			const nAttrType = pAttribute.type;
+			if (nAttrType != DmAttributeType.Element) {
 				buf.putString('\"' + pName + '\" \"' + DataModel.GetAttributeNameForType(nAttrType) + '\" ');
 			} else {
 				// Elements either serialize their type name or 'element' depending on whether they are inlined
@@ -131,7 +130,7 @@ export class DmSerializerKeyValues2 {
 
 			switch (nAttrType) {
 				default:
-					if (nAttrType >= AT_FIRST_ARRAY_TYPE) {
+					if (nAttrType >= DmAttributeTypeFirstArray) {
 						this.serializeArrayAttribute(buf, pAttribute);
 						//TODO
 						//console.error('if ( nAttrType >= AT_FIRST_ARRAY_TYPE )');
@@ -151,15 +150,15 @@ export class DmSerializerKeyValues2 {
 					}
 					break;
 
-				case AT_STRING:
+				case DmAttributeType.String:
 					// Don't explicitly add string delimiters; serialization does that.
 					pAttribute.serialize(buf);
 					break;
-				case AT_ELEMENT:
+				case DmAttributeType.Element:
 					this.#serializeElementAttribute(buf, dict, pAttribute);
 					break;
 
-				case AT_ELEMENT_ARRAY:
+				case DmAttributeType.ElementArray:
 					this.#serializeElementArrayAttribute(buf, dict, pAttribute);
 					//console.error('SerializeElementArrayAttribute( buf, dict, pAttribute );');TODO REMOVE me
 					break;
@@ -172,16 +171,16 @@ export class DmSerializerKeyValues2 {
 
 	}
 
-	#serializeElementAttribute(buf: UtlBuffer, dict: DmElementSerializationDictionary, pAttribute: DmAttribute) {
-		const pElement = pAttribute.getValue();
-		if (dict.shouldInlineElement(pElement)) {
+	#serializeElementAttribute(buf: UtlBuffer, dict: DmElementSerializationDictionary, pAttribute: DmAttribute): void {
+		const pElement = pAttribute.getValue() as DmElement;
+		if (pElement && dict.shouldInlineElement(pElement)) {
 			buf.putString('\"' + pElement.getTypeString() + '\"\n{\n');
 			if (pElement) {
 				this.saveElement(buf, dict, pElement, false);
 			}
 			buf.putString('}\n');
 		} else {
-			buf.putString('\"' + DataModel.GetAttributeNameForType(AT_ELEMENT) + '\" \"')
+			buf.putString('\"' + DataModel.GetAttributeNameForType(DmAttributeType.Element) + '\" \"')
 			if (pElement) {
 				Serialize(buf, pElement.getId());
 			}
@@ -190,16 +189,14 @@ export class DmSerializerKeyValues2 {
 	}
 
 	#serializeElementArrayAttribute(buf: UtlBuffer, dict: DmElementSerializationDictionary, pAttribute: DmAttribute) {
-		const array = pAttribute.getValue();
-
-
+		const array = pAttribute.getValue() as DmElement[];
 
 		buf.putString('\n[\n');
 		buf.pushTab();
 
 		const nCount = (array instanceof Array) ? array.length : 0;
 		for (let i = 0; i < nCount; ++i) {
-			const pElement = array[i];
+			const pElement = array[i]!;
 			if (dict.shouldInlineElement(pElement)) {
 				buf.putString('\"' + pElement.getTypeString() + '\"\n{\n');
 				if (pElement) {
@@ -207,8 +204,8 @@ export class DmSerializerKeyValues2 {
 				}
 				buf.putString('}');
 			} else {
-				//var pAttributeType = AttributeTypeName(AT_ELEMENT);
-				buf.putString('\"' + DataModel.GetAttributeNameForType(AT_ELEMENT) + '\" \"')
+				//var pAttributeType = AttributeTypeName(DmAttributeType.Element);
+				buf.putString('\"' + DataModel.GetAttributeNameForType(DmAttributeType.Element) + '\" \"')
 				if (pElement) {
 					//::Serialize( buf, pElement->GetId() );
 					Serialize(buf, pElement.getId());
@@ -227,21 +224,21 @@ export class DmSerializerKeyValues2 {
 	}
 
 	serializeArrayAttribute(buf: UtlBuffer, pAttribute: DmAttribute) {
-		const array = pAttribute.getValue();
+		const array = pAttribute.getValue() as [];
 
 		buf.putString('\n[\n');
 		buf.pushTab();
 
 		const nCount = (array instanceof Array) ? array.length : 0;
 		for (let i = 0; i < nCount; ++i) {
-			if (pAttribute.getType() != AT_STRING_ARRAY) {
+			if (pAttribute.type != DmAttributeType.StringArray) {
 				buf.putChar('\"');
 				buf.pushTab();
 			}
 
 			const attribute = array[i]
 			//attribute.serialize(buf);
-			if (pAttribute.getType() != AT_STRING_ARRAY) {
+			if (pAttribute.type != DmAttributeType.StringArray) {
 				//buf.putString(String(attribute));
 				pAttribute.serializeIndex(i, buf);
 			} else {
@@ -249,7 +246,7 @@ export class DmSerializerKeyValues2 {
 			}
 			//array.GetAttribute()->SerializeElement( i, buf );
 
-			if (pAttribute.getType() != AT_STRING_ARRAY) {
+			if (pAttribute.type != DmAttributeType.StringArray) {
 				buf.popTab();
 				buf.putChar('\"');
 			}

@@ -1,8 +1,8 @@
 import { DmAttribute } from './dmattribute';
-export * from './dmattributetypes2';
-import { AT_STRING, AT_UNKNOWN } from './dmattributetypes';
+import { DmAttributeType } from './dmattributetypes';
 import { DmElementReference } from './dmelementreference';
 import { UniqueId } from './uniqueid';
+export * from './dmattributetypes2';
 
 /**
  *
@@ -16,7 +16,7 @@ CDmElement::CDmElement( DmElementHandle_t handle, const char *pElementType, cons
 const DMELEMENT_HANDLE_INVALID = -1;
 export class DmElement {
 	isDmElement: true = true;
-	m_pAttributes?: DmAttribute;
+	m_pAttributes: DmAttribute | null = null;
 	m_ref: DmElementReference
 	m_Type: string;
 	#m_bDirty = false;
@@ -32,12 +32,12 @@ export class DmElement {
 		this.m_Id = id;
 		this.m_fileId = fileid;
 
-		this.createAttribute('name', AT_STRING, pElementName);
+		this.createAttribute('name', DmAttributeType.String, pElementName);
 	}
 
 	//CDmAttribute *CDmElement::CreateAttribute( const char *pAttributeName, DmAttributeType_t type )
-	createAttribute(attributeName: string, attributeType: number/*TODO: change type*/, attributeValue: any) {
-		if (this.hasAttribute(attributeName)) {
+	createAttribute(attributeName: string, attributeType: DmAttributeType, attributeValue: any) {
+		if (this.hasAttribute(attributeName, attributeType)) {
 			const attribute = this.findAttribute(attributeName);
 			if (attribute) {
 				attribute.setValue(attributeValue);
@@ -63,22 +63,22 @@ export class DmElement {
 		return attribute;
 	}
 
-	hasAttribute(attributeName: string, attributeType?: number/*TODO: change type*/) {
-		attributeType = typeof attributeType !== 'undefined' ? attributeType : AT_UNKNOWN;
+	hasAttribute(attributeName: string, attributeType: DmAttributeType) {
+		//attributeType = typeof attributeType !== 'undefined' ? attributeType : DmAttributeType.Unknown;
 
 		const attribute = this.findAttribute(attributeName);
 		if (!attribute) {
 			return false;
 		}
-		return (attributeType == AT_UNKNOWN || (attribute.getType() == attributeType));
+		return (attributeType == DmAttributeType.Unknown || (attribute.type == attributeType));
 	}
 
-	findAttribute(attributeName: string): DmAttribute | undefined {
+	findAttribute(attributeName: string): DmAttribute | null {
 		if (this.m_pAttributes) {
 			return this.m_pAttributes.findAttribute(attributeName);
 		}
 
-		return;
+		return null;
 
 		//UtlSymId_t find = g_pDataModel->GetSymbol( pAttributeName );TODO
 		/*for ( CDmAttribute *pAttr = m_pAttributes; pAttr; pAttr = pAttr->NextAttribute() )

@@ -1,6 +1,5 @@
-import { DmAttribute } from './dmattribute'
-import { AT_ELEMENT, AT_INT, AT_FLOAT, AT_BOOL, AT_STRING, AT_VOID, AT_OBJECTID, AT_TIME, AT_COLOR, AT_VECTOR2, AT_VECTOR3, AT_VECTOR4, AT_QANGLE, AT_QUATERNION, AT_VMATRIX } from './dmattributetypes';
-import { AT_ELEMENT_ARRAY, AT_INT_ARRAY, AT_FLOAT_ARRAY, AT_BOOL_ARRAY, AT_STRING_ARRAY, AT_VOID_ARRAY, AT_OBJECTID_ARRAY, AT_TIME_ARRAY, AT_COLOR_ARRAY, AT_VECTOR2_ARRAY, AT_VECTOR3_ARRAY, AT_VECTOR4_ARRAY, AT_QANGLE_ARRAY, AT_QUATERNION_ARRAY, AT_VMATRIX_ARRAY } from './dmattributetypes';
+import { DmAttribute } from './dmattribute';
+import { DmAttributeType } from './dmattributetypes';
 
 
 
@@ -54,36 +53,36 @@ export class DmAttributeInfo {
 }
 
 
-DECLARE_ATTRIBUTE_TYPE('int', AT_INT, 'int', 'value = 0;');
-DECLARE_ATTRIBUTE_TYPE('float', AT_FLOAT, 'float', 'value = 0.0f;');
-DECLARE_ATTRIBUTE_TYPE('bool', AT_BOOL, 'bool', 'value = false;');
-DECLARE_ATTRIBUTE_TYPE('Color', AT_COLOR, 'color', 'value.SetColor( 0, 0, 0, 255 );');
-DECLARE_ATTRIBUTE_TYPE('Vector2D', AT_VECTOR2, 'vector2', 'value.Init( 0.0f, 0.0f );');
-DECLARE_ATTRIBUTE_TYPE('Vector', AT_VECTOR3, 'vector3', 'value.Init( 0.0f, 0.0f, 0.0f );');
-DECLARE_ATTRIBUTE_TYPE('Vector4D', AT_VECTOR4, 'vector4', 'value.Init( 0.0f, 0.0f, 0.0f, 0.0f );');
-DECLARE_ATTRIBUTE_TYPE('QAngle', AT_QANGLE, 'qangle', 'value.Init( 0.0f, 0.0f, 0.0f );');
-DECLARE_ATTRIBUTE_TYPE('Quaternion', AT_QUATERNION, 'quaternion', 'value.Init( 0.0f, 0.0f, 0.0f, 1.0f );');
-DECLARE_ATTRIBUTE_TYPE('VMatrix', AT_VMATRIX, 'matrix', 'MatrixSetIdentity( value );');
-DECLARE_ATTRIBUTE_TYPE('CUtlString', AT_STRING, 'string', 'value.Set( NULL );');
-DECLARE_ATTRIBUTE_TYPE('CUtlBinaryBlock', AT_VOID, 'binary', 'value.Set( NULL, 0 );');
-//DECLARE_ATTRIBUTE_TYPE('DmObjectId_t',			AT_OBJECTID,			'elementid',	'InvalidateUniqueId( &value );' );
-DECLARE_ATTRIBUTE_TYPE('DmObjectId_t', AT_OBJECTID, 'time', 'InvalidateUniqueId( &value );');
-DECLARE_ATTRIBUTE_TYPE_INTERNAL('DmElementHandle_t', 'DmElementAttribute_t', AT_ELEMENT, 'element', 'value = DMELEMENT_HANDLE_INVALID;')
+DECLARE_ATTRIBUTE_TYPE('int', DmAttributeType.Int, 'int', 'value = 0;');
+DECLARE_ATTRIBUTE_TYPE('float', DmAttributeType.Float, 'float', 'value = 0.0f;');
+DECLARE_ATTRIBUTE_TYPE('bool', DmAttributeType.Bool, 'bool', 'value = false;');
+DECLARE_ATTRIBUTE_TYPE('Color', DmAttributeType.Color, 'color', 'value.SetColor( 0, 0, 0, 255 );');
+DECLARE_ATTRIBUTE_TYPE('Vector2D', DmAttributeType.Vector2, 'vector2', 'value.Init( 0.0f, 0.0f );');
+DECLARE_ATTRIBUTE_TYPE('Vector', DmAttributeType.Vector3, 'vector3', 'value.Init( 0.0f, 0.0f, 0.0f );');
+DECLARE_ATTRIBUTE_TYPE('Vector4D', DmAttributeType.Vector4, 'vector4', 'value.Init( 0.0f, 0.0f, 0.0f, 0.0f );');
+DECLARE_ATTRIBUTE_TYPE('QAngle', DmAttributeType.QAngle, 'qangle', 'value.Init( 0.0f, 0.0f, 0.0f );');
+DECLARE_ATTRIBUTE_TYPE('Quaternion', DmAttributeType.Quaternion, 'quaternion', 'value.Init( 0.0f, 0.0f, 0.0f, 1.0f );');
+DECLARE_ATTRIBUTE_TYPE('VMatrix', DmAttributeType.VMatrix, 'matrix', 'MatrixSetIdentity( value );');
+DECLARE_ATTRIBUTE_TYPE('CUtlString', DmAttributeType.String, 'string', 'value.Set( NULL );');
+DECLARE_ATTRIBUTE_TYPE('CUtlBinaryBlock', DmAttributeType.Void, 'binary', 'value.Set( NULL, 0 );');
+//DECLARE_ATTRIBUTE_TYPE('DmObjectId_t',			DmAttributeType.ObjectId,			'elementid',	'InvalidateUniqueId( &value );' );
+DECLARE_ATTRIBUTE_TYPE('DmObjectId_t', DmAttributeType.ObjectId, 'time', 'InvalidateUniqueId( &value );');
+DECLARE_ATTRIBUTE_TYPE_INTERNAL('DmElementHandle_t', 'DmElementAttribute_t', DmAttributeType.Element, 'element', 'value = DMELEMENT_HANDLE_INVALID;')
 
 
 
-DECLARE_ATTRIBUTE_ARRAY_TYPE('int', AT_INT_ARRAY, 'int_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('float', AT_FLOAT_ARRAY, 'float_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('bool', AT_BOOL_ARRAY, 'bool_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('Color', AT_COLOR_ARRAY, 'color_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector2D', AT_VECTOR2_ARRAY, 'vector2_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector', AT_VECTOR3_ARRAY, 'vector3_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector4D', AT_VECTOR4_ARRAY, 'vector4_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('QAngle', AT_QANGLE_ARRAY, 'qangle_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('Quaternion', AT_QUATERNION_ARRAY, 'quaternion_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('VMatrix', AT_VMATRIX_ARRAY, 'matrix_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('CUtlString', AT_STRING_ARRAY, 'string_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE('CUtlBinaryBlock', AT_VOID_ARRAY, 'binary_array')
-//DECLARE_ATTRIBUTE_ARRAY_TYPE('DmObjectId_t',		AT_OBJECTID_ARRAY,		'elementid_array' )
-DECLARE_ATTRIBUTE_ARRAY_TYPE('DmObjectId_t', AT_OBJECTID_ARRAY, 'time_array')
-DECLARE_ATTRIBUTE_ARRAY_TYPE_INTERNAL('DmElementHandle_t', 'DmElementArray_t', AT_ELEMENT_ARRAY, 'element_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('int', DmAttributeType.IntArray, 'int_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('float', DmAttributeType.FloatArray, 'float_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('bool', DmAttributeType.BoolArray, 'bool_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('Color', DmAttributeType.ColorArray, 'color_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector2D', DmAttributeType.Vector2Array, 'vector2_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector', DmAttributeType.Vector3Array, 'vector3_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('Vector4D', DmAttributeType.Vector4Array, 'vector4_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('QAngle', DmAttributeType.QAngleArray, 'qangle_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('Quaternion', DmAttributeType.QuaternionArray, 'quaternion_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('VMatrix', DmAttributeType.VMatrixArray, 'matrix_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('CUtlString', DmAttributeType.StringArray, 'string_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE('CUtlBinaryBlock', DmAttributeType.VoidArray, 'binary_array')
+//DECLARE_ATTRIBUTE_ARRAY_TYPE('DmObjectId_t',		DmAttributeType.ObjectIdArray,		'elementid_array' )
+DECLARE_ATTRIBUTE_ARRAY_TYPE('DmObjectId_t', DmAttributeType.ObjectIdArray, 'time_array')
+DECLARE_ATTRIBUTE_ARRAY_TYPE_INTERNAL('DmElementHandle_t', 'DmElementArray_t', DmAttributeType.ElementArray, 'element_array')

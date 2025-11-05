@@ -28,57 +28,57 @@ export class UtlBuffer {
 
 	}
 
-	isText() {
+	isText(): boolean {
 		return (this.#m_Flags & BufferFlags.TEXT_BUFFER) != 0;
 	}
 
-	pushTab() {
+	pushTab(): void {
 		++this.#m_nTab;
 	}
 
-	popTab() {
+	popTab(): void {
 		if (--this.#m_nTab < 0) {
 			this.#m_nTab = 0;
 		}
 	}
 
-	#wasLastCharacterCR() {
+	#wasLastCharacterCR(): boolean {
 		if (!this.isText()) {
 			return false;
 		}
-		const lastString = this.#buffer[this.#buffer.length - 1];
+		const lastString = this.#buffer[this.#buffer.length - 1]!;
 		return (lastString.substring(lastString.length - 1) == '\n');
 	}
 
-	#putTabs() {
+	#putTabs(): void {
 		const nTabCount = (this.#m_Flags & BufferFlags.AUTO_TABS_DISABLED) ? 0 : this.#m_nTab;
 		for (let i = nTabCount; --i >= 0;) {
 			this.#putTypeBinChar('\t');
 		}
 	}
 
-	#bufferPush(c: string) {
+	#bufferPush(c: string): void {
 		if (c.length) {
 			this.#buffer.push(c);
 		}
 	}
 
-	#putTypeBinChar(c: string) {
+	#putTypeBinChar(c: string): void {
 		this.#bufferPush(c);
 	}
 
-	putChar(c: string) {
+	putChar(c: string): void {
 		if (this.#wasLastCharacterCR()) {
 			this.#putTabs();
 		}
 		this.#bufferPush(c);
 	}
 
-	#put(s: string, size: number) {
+	#put(s: string, size: number): void {
 		this.#bufferPush(s.substring(0, size));
 	}
 
-	putString(s: string) {
+	putString(s: string): void {
 		if (!this.isText()) {
 			if (s) {
 				this.#bufferPush(s);
@@ -110,7 +110,7 @@ export class UtlBuffer {
 		}
 	}
 
-	#putDelimitedCharInternal(c: string) {
+	#putDelimitedCharInternal(c: string): void {
 		const l = conversionArray[c];//pConv->GetConversionLength( c );
 		if (!l) {
 			this.putChar(c);
@@ -120,7 +120,7 @@ export class UtlBuffer {
 		}
 	}
 
-	putDelimitedString(s: string) {
+	putDelimitedString(s: string): void {
 		if (typeof s != 'string') {
 			s = '';
 		}
@@ -137,7 +137,7 @@ export class UtlBuffer {
 
 		const nLen = s.length; //? Q_strlen( string ) : 0;
 		for (let i = 0; i < nLen; ++i) {
-			this.#putDelimitedCharInternal(s[i]);
+			this.#putDelimitedCharInternal(s[i]!);
 		}
 
 		if (this.#wasLastCharacterCR()) {
@@ -146,11 +146,11 @@ export class UtlBuffer {
 		this.#put('\"', 1);//Put( pConv->GetDelimiter(), pConv->GetDelimiterLength() );
 	}
 
-	isValid() {
+	isValid(): boolean {
 		return this.#m_Error == 0;
 	}
 
-	getBuffer() {
+	getBuffer(): string {
 		return this.#buffer.join('');
 	}
 }

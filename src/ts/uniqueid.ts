@@ -3,11 +3,11 @@ import { UtlBuffer } from './utlbuffer';
 export class UniqueId {
 	value?: string;
 
-	createUniqueId() {
+	createUniqueId(): void {
 		this.value = generateUUID()
 	}
 
-	Serialize(buf: UtlBuffer) {
+	Serialize(buf: UtlBuffer): boolean {
 		if (buf.isText()) {
 			if (this.value != undefined) {
 				buf.putString(this.value);
@@ -22,7 +22,7 @@ export class UniqueId {
 	}
 }
 
-function generateUUID() {
+function generateUUID(): string {
 	let d = Date.now();
 	const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 		const r = (d + Math.random() * 16) % 16 | 0;

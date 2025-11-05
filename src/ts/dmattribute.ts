@@ -1,75 +1,68 @@
 import { quat, vec2, vec3, vec4 } from 'gl-matrix';
-import { FATTRIB_TOPOLOGICAL, FATTRIB_TYPEMASK } from './attributeflags';
-import { AT_UNKNOWN, AT_ELEMENT, AT_INT, AT_FLOAT, AT_BOOL, AT_STRING, AT_VOID, AT_OBJECTID, AT_TIME, AT_COLOR, AT_VECTOR2, AT_VECTOR3, AT_VECTOR4, AT_QANGLE, AT_QUATERNION, AT_VMATRIX } from './dmattributetypes';
-import { AT_FIRST_ARRAY_TYPE, AT_ELEMENT_ARRAY, AT_OBJECTID_ARRAY, AT_TYPE_COUNT } from './dmattributetypes';
+import { FATTRIB_TOPOLOGICAL } from './attributeflags';
+import { DmAttributeType, DmAttributeTypeFirstArray, DmAttributeTypeLastArray } from './dmattributetypes';
 import { DmAttributeInfo, DmElement } from './dmelement';
 import { UtlBuffer } from './utlbuffer';
 
 export const DMATTRIBUTE_HANDLE_INVALID = -1;
 
+
+type DmAttributeValueSingle = string | DmElement | boolean | number | vec2 | vec3 | vec4;
+export type DmAttributeValue = DmAttributeValueSingle | DmAttributeValueSingle[];
+
+
+//export type CDmxAttributeValue = null | undefined | boolean | number | CDmxElement | ParticleColor | vec2 | vec3 | vec4 | string;
+
 export class DmAttribute {
-	owner: DmElement;
-	name: string;
-	type: number;
-	value?: any;
+	readonly owner: DmElement;
+	readonly name: string;
+	readonly type: DmAttributeType;
+	value: DmAttributeValue | null = null;
 	m_Handle = DMATTRIBUTE_HANDLE_INVALID;
-	next?: DmAttribute;
+	next: DmAttribute | null = null;
 	m_nFlags: number;
 	static s_pAttrInfo: DmAttributeInfo[] = [];//TODO: fix this shit
 
-	constructor(owner: DmElement, attributeType: number/*TODO: create enum*/, attributeName: string) {
+	constructor(owner: DmElement, type: DmAttributeType, name: string) {
 		this.owner = owner;
-		this.name = attributeName;
-		this.type = attributeType;
-		this.m_nFlags = attributeType;
+		this.name = name;
+		this.type = type;
+		this.m_nFlags = 0;
 
-		switch (attributeType) {
-			case AT_ELEMENT:
-			case AT_ELEMENT_ARRAY:
-			case AT_OBJECTID:
-			case AT_OBJECTID_ARRAY:
+		if (type >= DmAttributeTypeFirstArray) {
+			this.value = [];
+		}
+
+		switch (type) {
+			case DmAttributeType.Element:
+			case DmAttributeType.ElementArray:
+			case DmAttributeType.ObjectId:
+			case DmAttributeType.ObjectIdArray:
 				this.m_nFlags |= FATTRIB_TOPOLOGICAL;
 				break;
 		}
 	}
 
-	static createAttribute(owner: DmElement, attributeType: number, attributeName: string) {
-		if (owner.isDmElement /*TODO: remove test*/
-			&& typeof attributeType == 'number'
-			&& typeof attributeName == 'string'
-		) {
-			switch (attributeType) {
-				case AT_UNKNOWN:
-					//Assert( 0 );TODO
-					return null;
-				default:
-					return new DmAttribute(owner, attributeType, attributeName);
-			}
-		} else {
-			console.error('Invalid attributes in DmAttribute.createAttribute : ', owner, attributeType, attributeName);
+	static createAttribute(owner: DmElement, type: DmAttributeType, name: string): DmAttribute | null {
+		switch (type) {
+			case DmAttributeType.Unknown:
+				return null;
+			default:
+				return new DmAttribute(owner, type, name);
 		}
-		return null;
 	}
 
-	getName() {
-		return this.name;
-	}
-	getType() {
-		//	return this.type;
-		return this.m_nFlags & FATTRIB_TYPEMASK;
-	}
-
-	setNextAttribute(attribute: DmAttribute | undefined) {
+	setNextAttribute(attribute: DmAttribute | null): void {
 		this.next = attribute;
 	}
 
-	getNextAttribute() {
+	getNextAttribute(): DmAttribute | null {
 		return this.next;
 	}
 
 
-	checkCyclicRedundancy(other: DmAttribute) {
-		let current: DmAttribute | undefined = this;
+	checkCyclicRedundancy(other: DmAttribute): boolean {
+		let current: DmAttribute | null = this;
 
 		do {
 			if (current == other) {
@@ -81,8 +74,8 @@ export class DmAttribute {
 		return false;
 	}
 
-	findAttribute(attributeName: string): DmAttribute | undefined {
-		let current: DmAttribute | undefined = this;
+	findAttribute(attributeName: string): DmAttribute | null {
+		let current: DmAttribute | null = this;
 
 		do {
 			if (current.name == attributeName) {//TODO:GetNameSymbol
@@ -91,7 +84,7 @@ export class DmAttribute {
 			current = current.next;
 		} while (current)
 
-		return;
+		return null;
 	}
 
 	nextAttribute() {
@@ -102,56 +95,51 @@ export class DmAttribute {
 		return (flags & this.m_nFlags) ? true : false;
 	}
 
-	setValue(value?: any) {
+	setValue(value: DmAttributeValue | null): void {
 		/* TODO check value / type*/
 		this.value = value;
 	}
 
-	getValue() {
-		return this.value;
+	getValue(): DmAttributeValue | null {
+		return this.value as DmAttributeValue;
 	}
 
-	pushValue(value?: any) {
+	pushValue(value: DmAttributeValue | null) {
 		//TODO: check value type ?
-		if (this.type < AT_FIRST_ARRAY_TYPE) {
+		if (this.type < DmAttributeTypeFirstArray) {
 			console.error('Trying to push value in non array attribute');
 		}
 
-		this.value = this.value || [];
-		this.value.push(value);
+		(this.value as any[]).push(value);
 	}
 
-	getValueElement() {
-		return this.value;
-	}
-
-	serialize(buf: UtlBuffer) {
+	serialize(buf: UtlBuffer): void {
 		/*switch (this.type) {
-			case AT_STRING:
+			case DmAttributeType.String:
 				buf.putDelimitedString(this.getValue());
 				return buf.isValid();
-			case AT_FLOAT:
-			case AT_INT:
+			case DmAttributeType.Float:
+			case DmAttributeType.Int:
 				var v = this.getValue() || 0;
 				buf.putString(v.toString());
 				return buf.isValid();
-			case AT_BOOL:
+			case DmAttributeType.Bool:
 				buf.putString(this.getValue() ? '1' : '0');
 				return buf.isValid();
-			case AT_VECTOR3:
+			case DmAttributeType.Vector3:
 				var v = this.getValue() || vec3.create();
 				buf.putString(v[0] + ' ' + v[1] + ' ' + v[2]);
 				return buf.isValid();
-			case AT_QUATERNION:
+			case DmAttributeType.Quaternion:
 				console.error(this.getValue());
 				var q = this.getValue() || quat.create();
 				buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + q[3]);
 				return buf.isValid();
-			case AT_COLOR:
+			case DmAttributeType.Color:
 				var q = this.getValue() || vec4.create();
 				buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + (q[3] || 0 ));
 				return buf.isValid();
-			case AT_TIME:
+			case DmAttributeType.Time:
 				buf.putString(this.getValue().toFixed(4));
 				return buf.isValid();
 			default:
@@ -159,51 +147,55 @@ export class DmAttribute {
 				//TODO;
 		}
 		*/
-		this.#serialize(this.getValue(), buf);
+		const value = this.getValue();
+		if (value) {
+			this.#serialize(value, buf);
+		}
 	}
 
-	serializeIndex(index: number, buf: UtlBuffer) {
-		this.#serialize(this.getValue()[index], buf);
+	serializeIndex(index: number, buf: UtlBuffer): void {
+		if (this.type < DmAttributeTypeFirstArray) {
+			return;
+		}
+
+		const value = (this.getValue() as unknown as DmAttributeValueSingle[])?.[index];
+		if (value) {
+			this.#serialize(value, buf);
+		}
 	}
 
-	#serialize(value: any, buf: UtlBuffer) {
-		const type = this.type % (AT_FIRST_ARRAY_TYPE - 1);
+	#serialize(value: DmAttributeValue, buf: UtlBuffer): boolean {
+		const type = this.type % (DmAttributeTypeFirstArray - 1);
 		switch (type) {
-			case AT_STRING:
-				buf.putDelimitedString(value);
+			case DmAttributeType.String:
+				buf.putDelimitedString(value as string);
 				return buf.isValid();
-			case AT_FLOAT:
-			case AT_INT:
-				var v = value || 0;
-				buf.putString(v.toString());
+			case DmAttributeType.Float:
+			case DmAttributeType.Int:
+				buf.putString(String(value));
 				return buf.isValid();
-			case AT_BOOL:
+			case DmAttributeType.Bool:
 				buf.putString(value ? '1' : '0');
 				return buf.isValid();
-			case AT_VECTOR2:
-				var v = value || vec2.create();
-				buf.putString(v[0] + ' ' + v[1]);
+			case DmAttributeType.Vector2:
+				buf.putString((value as vec2)[0] + ' ' + (value as vec2)[1]);
 				return buf.isValid();
-			case AT_VECTOR3:
-				var v = value || vec3.create();
-				buf.putString(v[0] + ' ' + v[1] + ' ' + v[2]);
+			case DmAttributeType.Vector3:
+				buf.putString((value as vec3)[0] + ' ' + (value as vec3)[1] + ' ' + (value as vec3)[2]);
 				return buf.isValid();
-			case AT_QUATERNION:
-				var q = value || quat.create();
-				quat.normalize(q, q);
-				buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + q[3]);
+			case DmAttributeType.Quaternion:
+				quat.normalize(value as quat, value as quat);
+				buf.putString((value as quat)[0] + ' ' + (value as quat)[1] + ' ' + (value as quat)[2] + ' ' + (value as quat)[3]);
 				return buf.isValid();
-			case AT_COLOR:
-				var q = value || vec4.create();
-				buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + (q[3] || 0));
+			case DmAttributeType.Color:
+				buf.putString((value as vec4)[0] + ' ' + (value as vec4)[1] + ' ' + (value as vec4)[2] + ' ' + ((value as vec4)[3] ?? 0));
 				return buf.isValid();
-			case AT_TIME:
-				buf.putString(value.toFixed(4));
+			case DmAttributeType.Time:
+				buf.putString((value as number).toFixed(4));
 				return buf.isValid();
 			default:
-			//console.error('serialize not coded for type ' + type);
-			//TODO;
 		}
+		return false
 	}
 
 	serializesOnMultipleLines() {
@@ -230,8 +222,8 @@ export class DmAttribute {
 
 //DmAttribute.s_pAttrInfo = DmAttribute.s_pAttrInfo ?? [];//TODO: fix this shit
 export function AttributeTypeName(type: number) {
-	if ((type >= 0) && (type < AT_TYPE_COUNT)) {
-		return DmAttribute.s_pAttrInfo[type].getAttributeTypeName();
+	if ((type >= 0) && (type <= DmAttributeTypeLastArray)) {
+		return DmAttribute.s_pAttrInfo[type]!.getAttributeTypeName();
 	}
 	return 'unknown';
 }
@@ -243,7 +235,7 @@ function AttributeType(pName) {
 			return i;
 	}
 
-	return AT_UNKNOWN;
+	return DmAttributeType.Unknown;
 }
 
 function Q_stricmp(str1, str2) {

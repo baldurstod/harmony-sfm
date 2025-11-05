@@ -2,7 +2,7 @@ import { UniqueId } from './uniqueid';
 import { UtlBuffer } from './utlbuffer';
 
 
-export function Serialize(buf: UtlBuffer, src: UniqueId) {
+export function Serialize(buf: UtlBuffer, src: UniqueId): void {
 	if (buf instanceof UtlBuffer) {
 		switch (true) {
 			case src instanceof UniqueId:
@@ -18,12 +18,12 @@ export function Serialize(buf: UtlBuffer, src: UniqueId) {
 }
 
 //void SetSerializationDelimiter( CUtlCharConversion *pConv )
-export function SetSerializationDelimiter() {
+export function SetSerializationDelimiter(): void {
 	//TODO
 }
 
 //void SetSerializationArrayDelimiter( const char *pDelimiter )
-export function SetSerializationArrayDelimiter() {
+export function SetSerializationArrayDelimiter(): void {
 	//TODO
 }
 
