@@ -56,16 +56,7 @@ export class DmElement {
 		this.m_pAttributes = attribute;
 
 		if (attributeValue !== undefined) {
-			if (attributeType < DmAttributeTypeFirstArray) {
-				/* TODO check value / type*/
-				attribute.setValue(attributeValue);
-			} else {
-				if (attributeValue !== null) {
-					for (const value of attributeValue as []) {
-						attribute.pushValue(value);
-					}
-				}
-			}
+			attribute.setValue(attributeValue);
 		}
 
 		//g_pDataModelImp->NotifyState( NOTIFY_CHANGE_TOPOLOGICAL );
