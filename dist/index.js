@@ -1,4 +1,4 @@
-import { quat, vec4, vec3, mat3, vec2 } from 'gl-matrix';
+import { quat, vec3, vec2, vec4, mat3 } from 'gl-matrix';
 import { degToRad, SourceModel, Skeleton, Property, Source1MaterialManager } from 'harmony-3d';
 
 /*
@@ -262,14 +262,17 @@ class DmAttribute {
                 buf.putString(value ? '1' : '0');
                 return buf.isValid();
             case DmAttributeType.Vector2:
-                buf.putString(value[0] + ' ' + value[1]);
+                const v2 = value ?? vec2.create();
+                buf.putString(v2[0] + ' ' + v2[1]);
                 return buf.isValid();
             case DmAttributeType.Vector3:
-                buf.putString(value[0] + ' ' + value[1] + ' ' + value[2]);
+                const v3 = value ?? vec3.create();
+                buf.putString(v3[0] + ' ' + v3[1] + ' ' + v3[2]);
                 return buf.isValid();
             case DmAttributeType.Quaternion:
-                quat.normalize(value, value);
-                buf.putString(value[0] + ' ' + value[1] + ' ' + value[2] + ' ' + value[3]);
+                const q = value ?? quat.create();
+                quat.normalize(q, q);
+                buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + q[3]);
                 return buf.isValid();
             case DmAttributeType.Color:
                 buf.putString(value[0] + ' ' + value[1] + ' ' + value[2] + ' ' + (value[3] ?? 0));

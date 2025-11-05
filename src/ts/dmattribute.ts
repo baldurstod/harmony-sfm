@@ -170,14 +170,17 @@ export class DmAttribute {
 				buf.putString(value ? '1' : '0');
 				return buf.isValid();
 			case DmAttributeType.Vector2:
-				buf.putString((value as vec2)[0] + ' ' + (value as vec2)[1]);
+				const v2 = value as vec2 ?? vec2.create();
+				buf.putString(v2[0] + ' ' + v2[1]);
 				return buf.isValid();
 			case DmAttributeType.Vector3:
-				buf.putString((value as vec3)[0] + ' ' + (value as vec3)[1] + ' ' + (value as vec3)[2]);
+				const v3 = value as vec3 ?? vec3.create();
+				buf.putString(v3[0] + ' ' + v3[1] + ' ' + v3[2]);
 				return buf.isValid();
 			case DmAttributeType.Quaternion:
-				quat.normalize(value as quat, value as quat);
-				buf.putString((value as quat)[0] + ' ' + (value as quat)[1] + ' ' + (value as quat)[2] + ' ' + (value as quat)[3]);
+				const q = value as quat ?? quat.create();
+				quat.normalize(q, q);
+				buf.putString(q[0] + ' ' + q[1] + ' ' + q[2] + ' ' + q[3]);
 				return buf.isValid();
 			case DmAttributeType.Color:
 				buf.putString((value as vec4)[0] + ' ' + (value as vec4)[1] + ' ' + (value as vec4)[2] + ' ' + ((value as vec4)[3] ?? 0));
