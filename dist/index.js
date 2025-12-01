@@ -2859,7 +2859,7 @@ class SfmExporter {
                     let boneName = null;
                     //var effect = effectsList[effectIndex];
                     boneName = effect?.getControlPoint(0)?.parent?.name;
-                    sfm.createAnimSetForParticleSystem(effect.system, undefined, effect.name, characterGameModel, boneName ?? '', effect.getControlPoints());
+                    sfm.createAnimSetForParticleSystem(effect.name, undefined, effect.system, characterGameModel, boneName ?? '', effect.getControlPoints());
                 }
             }
         }
